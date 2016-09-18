@@ -2,6 +2,15 @@ const {connection, issueQuery, sanitizeReqBody} = require('./db.js');
 const bcrypt = require('bcryptjs');
 
 module.exports = function(app){
+  app.post('/users/authenticate', function(req, res){
+    console.log('request to authenticate user with username '+req.body.username+'. Request body:');
+    console.log(JSON.stringify(req.body));
+    let {username, password} = sanitizeReqBody(req);
+    let query = `SELECT * FROM users WHERE username=${username}`;
+    connection.query(query, function(err, rows){
+
+    });
+  });
   //accessible by admin only
   app.get('/users', function(req,res){
     let query = `SELECT * FROM users`;
@@ -36,6 +45,7 @@ module.exports = function(app){
   });
   //accessible by everyone. TODO: Only admins can create admins
   //requires sending password (duh)
+  //response.insertId contains the database id of newly created user
   app.post('/users', function(req,res){
     console.log('request to add user. Request body:');
     console.log(JSON.stringify(req.body));
