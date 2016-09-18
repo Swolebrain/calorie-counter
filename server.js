@@ -13,7 +13,10 @@ app.get('/', function(req,res){
   res.end('this will be the login page');
 });
 
-//Records CRUD
+//Entries CRUD
 require('./services/entries.js')(app);
+
+//Users CRUD
+require('./services/users.js')(app);
 
 app.listen(port, ()=>console.log("server listening on port", port));

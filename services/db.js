@@ -16,7 +16,7 @@ function issueQuery(query, res, errMessage){
   console.log(`Attempting query: \n ${query}`);
   connection.query(query, function(err, rows, fields){
     if (err){
-      res.end("Error: "+errMessage);
+      res.end("Error: "+errMessage+"\n"+err.toString());
       console.log(err);
     }
     else{
