@@ -21,6 +21,7 @@ app.use(session({
   })
 }));
 app.use(express.static('static'));
+app.set('view-engine', 'ejs');
 
 // app.get('/', function(req,res){
 //   res.end('this will be the login page');
