@@ -3,13 +3,13 @@ const express = require('express');
 const app = express();
 const port = 8999;
 const bodyparser = require('body-parser');
-const cors = require('cors');
+// const cors = require('cors');
 
 //session management
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 
-app.use(cors());
+// app.use(cors());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 app.use(session({
