@@ -20,10 +20,11 @@ app.use(session({
     url: 'mongodb://localhost/sessions'
   })
 }));
+app.use(express.static('static'));
 
-app.get('/', function(req,res){
-  res.end('this will be the login page');
-});
+// app.get('/', function(req,res){
+//   res.end('this will be the login page');
+// });
 
 //Entries CRUD
 require('./services/entries.js')(app);
