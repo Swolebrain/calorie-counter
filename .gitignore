@@ -1,2 +1,4 @@
 node_modules
 .dbconf.json
+.key.ssh
+.key.ssh.pub
