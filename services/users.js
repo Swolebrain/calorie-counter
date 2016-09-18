@@ -8,7 +8,22 @@ module.exports = function(app){
     let {username, password} = sanitizeReqBody(req);
     let query = `SELECT * FROM users WHERE username=${username}`;
     connection.query(query, function(err, rows){
-
+      if (err || !rows || rows.length === 0){
+        res.end('Error: cannot find user with stated username');
+      }
+      else{
+        let passwordMatches = bcrypt.compareSync(password, rows[0].password_hash);
+        if (passwordMatches){
+          let {id, username, calorie_budget} = rows[0];
+          req.session.uid = id;
+          req.session.isAuthenticated = true;
+          res.json({ id, username, calorie_budget});
+          if (rows[0].role == 'admin') req.session.isAdmin = true;
+        }
+        else{
+          res.end('Error: password is wrong');
+        }
+      }
     });
   });
   //accessible by admin only
