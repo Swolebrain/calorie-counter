@@ -65,8 +65,7 @@ module.exports = function(app){
     console.log('request to add user. Request body:');
     console.log(JSON.stringify(req.body));
     let {username, calorie_budget, role, password} = sanitizeReqBody(req);
-    console.log(role);
-    console.log(!req.session);
+    if (!role) role = `'user'`;
     if (role==`'admin'` && !(req.session && req.session.isAdmin)){
       console.log('Tried to add admin user without a valid admin session');
       res.end('Error: only admin users can create admin users');

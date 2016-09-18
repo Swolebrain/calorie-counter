@@ -21,11 +21,16 @@ app.use(session({
   })
 }));
 app.use(express.static('static'));
-app.set('view-engine', 'ejs');
+app.set('view engine', 'ejs');
 
-// app.get('/', function(req,res){
-//   res.end('this will be the login page');
-// });
+//MAIN ROUTES
+app.get('/login', function(req,res){
+  res.render('login');
+});
+app.get('/', function(req, res){
+  if (req.session.isAuthenticated) res.render('main');
+  else res.redirect('/login')
+});
 
 //Entries CRUD
 require('./services/entries.js')(app);
