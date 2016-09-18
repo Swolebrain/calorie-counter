@@ -1,5 +1,4 @@
-
-const connection = require('./db.js');
+const {connection, issueQuery, sanitizeReqBody} = require('./db.js');
 
 module.exports = function(app){
   //only admin access
@@ -7,12 +6,12 @@ module.exports = function(app){
     let query = `SELECT * FROM entries`;
     issueQuery(query, res, 'fetching all entries');
   });
-  //only admin, owner access
+  //accessible by admin or if req.params.id matches session id
   app.get('/entries/:id', function(req,res){
     let query = `SELECT * FROM entries WHERE id=${connection.escape(req.params.id)}`;
     issueQuery(query, res, 'fetching entry by id: '+req.params.id);
   });
-  //only admin, owner access
+  //accessible by admin or if req.params.id matches session id
   //requires ALL in fields to be re-sent in body
   //date, time, text, calories, uid
   //design decision: uid can never be changed
@@ -28,7 +27,7 @@ module.exports = function(app){
                 WHERE id=${connection.escape(req.params.id)}`;
     issueQuery(query, res, `modifying entry ${req.params.id} for ${uid}`);
   });
-  //only admin, owner access
+  //accessible by admin or if req.params.id matches session id
   //requires ALL in fields to be re-sent in body
   app.post('/entries', function(req,res){
     console.log('request body:');
@@ -42,34 +41,9 @@ module.exports = function(app){
                   VALUES (${date}, ${time}, ${text}, ${calories}, ${uid})`;
     issueQuery(query, res, 'posting an entry for '+uid);
   });
-  //only admin, owner access
+  //accessible by admin or if req.params.id matches session id
   app.delete('/entries/:id', function(req,res){
     let query = `DELETE FROM entries WHERE id=${connection.escape(req.params.id)}`;
     issueQuery(query, res, 'deleting entry with id '+req.params.id);
   });
 };
-
-function issueQuery(query, res, errMessage){
-  console.log(`Attempting query: \n ${query}`);
-  connection.query(query, function(err, rows, fields){
-    if (err){
-      res.end("Error: "+errMessage);
-      console.log(err);
-    }
-    else{
-      console.log("Rows\n",JSON.stringify(rows));
-      console.log('fields:');
-      console.log(JSON.stringify(fields));
-      res.json(rows);
-    }
-  });
-}
-
-function sanitizeReqBody(req){
-  let escapedReqBody = {};
-  Object.keys(req.body).forEach(key=>{
-    if (req.body[key])
-      escapedReqBody[key] = connection.escape(req.body[key]);
-  });
-  return escapedReqBody;
-}

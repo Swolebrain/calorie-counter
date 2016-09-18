@@ -12,4 +12,29 @@ connection.connect(function(err){
   }
 });
 
-module.exports = connection;
+function issueQuery(query, res, errMessage){
+  console.log(`Attempting query: \n ${query}`);
+  connection.query(query, function(err, rows, fields){
+    if (err){
+      res.end("Error: "+errMessage);
+      console.log(err);
+    }
+    else{
+      console.log("Rows\n",JSON.stringify(rows));
+      console.log('fields:');
+      console.log(JSON.stringify(fields));
+      res.json(rows);
+    }
+  });
+}
+
+function sanitizeReqBody(req){
+  let escapedReqBody = {};
+  Object.keys(req.body).forEach(key=>{
+    if (req.body[key])
+      escapedReqBody[key] = connection.escape(req.body[key]);
+  });
+  return escapedReqBody;
+}
+
+module.exports = {connection, issueQuery, sanitizeReqBody};
