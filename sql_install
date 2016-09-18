@@ -1,0 +1,21 @@
+CREATE DATABASE calorie_counter;
+GRANT ALL ON calorie_counter.* TO calorie_counter@localhost IDENTIFIED BY 'rFvGyHnJi99';
+
+CREATE TABLE users(
+id INT KEY NOT NULL AUTO_INCREMENT,
+username VARCHAR(64) NOT NULL,
+calorie_budget INT,
+role VARCHAR(16) NOT NULL,
+password_hash VARCHAR(128) NOT NULL);
+
+CREATE TABLE entries(
+id INT KEY NOT NULL AUTO_INCREMENT,
+date DATE NOT NULL,
+time VARCHAR(16) NOT NULL,
+text VARCHAR(128) NOT NULL,
+calories INT NOT NULL,
+uid INT NOT NULL,
+CONSTRAINT `fk_user`
+   FOREIGN KEY (uid) REFERENCES users(id)
+   ON DELETE CASCADE
+   ON UPDATE RESTRICT);
