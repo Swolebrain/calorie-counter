@@ -1,4 +1,5 @@
 const app = angular.module('AuthApp', ['ngRoute']);
+
 app.config(function($routeProvider){
   $routeProvider
   .when('/login', {
