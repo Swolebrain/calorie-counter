@@ -24,12 +24,8 @@ app.use(express.static('static'));
 app.set('view engine', 'ejs');
 
 //MAIN ROUTES
-app.get('/login', function(req,res){
-  res.render('login');
-});
 app.get('/', function(req, res){
-  if (req.session.isAuthenticated) res.render('main');
-  else res.redirect('/login')
+  res.render('main');
 });
 
 //Entries CRUD
