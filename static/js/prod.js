@@ -105,12 +105,7 @@ function getDate(dayOffset){
 module.exports = function($scope, userService, $timeout, $location){
   $scope.status = '';
   $scope.auth = function(){
-    $scope.username = $scope.username.trim();
-    $scope.password = $scope.password.trim();
-    if (!$scope.username || !$scope.password){
-      $scope.status = 'Please fill out all fields';
-      return;
-    }
+    if (!inputsAreFilled()) return;
     $scope.status = 'Logging in...';
     userService.authenticate($scope.username, $scope.password).success(res=>{
       if (res.data)
@@ -129,6 +124,26 @@ module.exports = function($scope, userService, $timeout, $location){
     //   $scope.status = 'Failed connecting to server. '+data+' '+status;
     // });
   };
+
+
+  function displayStatus(status){
+
+    $timeout(()=>$scope.status='',2500);
+  }
+  function inputsAreFilled(){
+    if (!$scope.username || !$scope.password){
+      displayStatus('Please fill out all fields');
+      return false;
+    }
+    $scope.username = $scope.username.trim();
+    $scope.password = $scope.password.trim();
+    //check again after removing whitespace
+    if (!$scope.username || !$scope.password){
+      return displayStatus('Please fill out all fields');
+      return false;
+    }
+    return true;
+  }
 };
 
 },{}],4:[function(require,module,exports){
