@@ -48,6 +48,12 @@ module.exports = function($scope, userService, $timeout, $location){
   console.log('login controller reporting in');
   $scope.status = '';
   $scope.auth = function(){
+    $scope.username = $scope.username.trim();
+    $scope.password = $scope.password.trim();
+    if (!$scope.username || !$scope.password){
+      $scope.status = 'Please fill out all fields';
+      return;
+    }
     $scope.status = 'Logging in...';
     userService.authenticate($scope.username, $scope.password).then(res=>{
       if (res.data)
@@ -73,25 +79,28 @@ module.exports = function($scope, userService, $timeout, $location){
   console.log('register controller reporting in');
   $scope.status = '';
   $scope.register = function(){
-    if ($scope.password != $scope.passwordConf){
+    let u = $scope.username.toString().trim();
+    let p = $scope.password.toString().trim();
+    let calorie_budget = $scope.calorie_budget.toString().trim();
+    if (p != $scope.passwordConf){ //already trimmed password
       $scope.status = "Passwords don't match!";
       return;
     }
+    if (!u || !p || !calorie_budget ){
+      $scope.status = 'Please fill out all fields';
+      return;
+    }
     $scope.status = 'Registering...';
-    userService.register($scope.username, $scope.password, $scope.calorie_budget).success(res=>{
-      if (res.data)
-        $scope.status = res.data;
-      else {
-        $scope.status = res;
-      }
+    userService.register(u, p, calorie_budget).success(res=>{
+      console.log(res);
       if (typeof(res) == 'string' && res.slice(0,5) == 'Error'){
+        $scope.status = res;
         $timeout(()=>$scope.status='',2500);
       }
       else{
-        window.location = userService.authRedirect;
+        //successfully logged in, redirect to /
+        $location.path('/');
       }
-    }).error((data, status)=>{
-      $scope.status = 'Failed connecting to server. '+data+' '+status;
     });
   };
 };
@@ -100,17 +109,29 @@ module.exports = function($scope, userService, $timeout, $location){
 module.exports = function($http){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
-  const isAuthenticated = false;
+  //When authenticated, this object contains {id, username, calorie_budget}
   let userObject = null;
   function authenticate(username, password){
     return $http.post(loginUri, {username, password}).success(res=>{
-      if (res.id) userObject = res;
       console.log(res);
+      if (res.id && res.calorie_budget && res.username) userObject = res;
       return res;
     }).error((data,status)=>alert('Error authenticating user:'+status))
   }
   function register(username, password, calorie_budget){
-    return $http.post(registerUri, {username, password, calorie_budget});
+    return $http.post(registerUri, {username, password, calorie_budget})
+    .success(res=>{
+      if (res.affectedRows === 1){ //user was created
+        let id = res.insertId;
+        userObject = {id, username, calorie_budget };
+        return res;
+      }
+      else{//user was not created
+        console.log('this is running');
+        return res.data;
+      }
+    })
+    .error((data, status) => alert('Error connecting to server:'+status));
   }
   function isLoggedIn(){
     return userObject != null;

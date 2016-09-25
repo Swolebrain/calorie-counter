@@ -9,7 +9,7 @@ module.exports = function($scope, userService, $timeout, $location){
       return;
     }
     $scope.status = 'Logging in...';
-    userService.authenticate($scope.username, $scope.password).then(res=>{
+    userService.authenticate($scope.username, $scope.password).success(res=>{
       if (res.data)
         $scope.status = res.data;
       else

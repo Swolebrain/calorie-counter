@@ -16,8 +16,8 @@ function issueQuery(query, res, errMessage){
   console.log(`Attempting query: \n ${query}`);
   connection.query(query, function(err, rows, fields){
     if (err){
-      res.end("Error: "+errMessage+"\n"+err.toString());
-      console.log(err);
+      res.end("Error: "+errMessage+' '+logError(err));
+      console.log("Error: "+errMessage+"\n"+err.toString()+"\n");
     }
     else{
       console.log("Rows\n",JSON.stringify(rows));
@@ -35,6 +35,10 @@ function sanitizeReqBody(req){
       escapedReqBody[key] = connection.escape(req.body[key]);
   });
   return escapedReqBody;
+}
+
+function logError(err){
+  if (err.toString.includes('ER_DUP_ENTRY') ) return 'Username already exists.';
 }
 
 module.exports = {connection, issueQuery, sanitizeReqBody};
