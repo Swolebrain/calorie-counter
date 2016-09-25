@@ -2,6 +2,12 @@ module.exports = function($scope, userService, $timeout, $location){
   console.log('login controller reporting in');
   $scope.status = '';
   $scope.auth = function(){
+    $scope.username = $scope.username.trim();
+    $scope.password = $scope.password.trim();
+    if (!$scope.username || !$scope.password){
+      $scope.status = 'Please fill out all fields';
+      return;
+    }
     $scope.status = 'Logging in...';
     userService.authenticate($scope.username, $scope.password).then(res=>{
       if (res.data)

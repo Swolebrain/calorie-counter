@@ -2,10 +2,17 @@ module.exports = function($scope, userService, $timeout, $location){
   console.log('register controller reporting in');
   $scope.status = '';
   $scope.register = function(){
-    if ($scope.password != $scope.passwordConf){
+    $scope.username = $scope.username.trim();
+    $scope.password = $scope.password.trim();
+    $scope.calorie_budget = $scope.calorie_budget.trim();
+    if ($scope.password != $scope.passwordConf){ //already trimmed password
       $scope.status = "Passwords don't match!";
       return;
     }
+    if (!$scope.username || !$scope.password || !$scope.calorie_budget ){
+      $scope.status = 'Please fill out all fields';
+      return;
+    })
     $scope.status = 'Registering...';
     userService.register($scope.username, $scope.password, $scope.calorie_budget).success(res=>{
       if (res.data)
