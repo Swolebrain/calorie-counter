@@ -18,6 +18,18 @@ module.exports = function($http, $location){
     return $http.post(registerUri, {username, password, calorie_budget})
     .error((data, status) => alert('Error connecting to server:'+status));
   }
+  //Server route requires {username, calorie_budget, role, password}
+  //this service sends {username, calorie_budget, password}
+  function updateUser(userObj){
+    return $http.put('users/'+userObj.id, userObj).success(res=>{
+      if (res.affectedRows === 1) {
+        console.log('saw affectedRows == 1');
+        userObject.calorie_budget = userObj.calorie_budget;
+        localStorage.setItem("userObject", JSON.stringify(userObject));
+      }
+      return res;
+    });
+  }
   function isLoggedIn(){
     return userObject != null;
   }
@@ -30,5 +42,5 @@ module.exports = function($http, $location){
     console.log('logging out...');
     $location.path('/login');
   }
-  return {authenticate, register, isLoggedIn, getUserObject, logOut};
+  return {authenticate, register, isLoggedIn, getUserObject, logOut, updateUser};
 };

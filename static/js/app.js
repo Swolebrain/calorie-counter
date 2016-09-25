@@ -45,9 +45,9 @@ app.run(['$rootScope', '$location', '$route', 'userService',
 .directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
-.controller('ReportsController', ['$scope', 'userService',
+.controller('ReportsController', ['$scope', 'userService', '$timeout', 'entriesService',
       require('./controllers/ReportsController.js')])
-.controller('SettingsController', ['$scope', 'userService',
+.controller('SettingsController', ['$scope', 'userService', '$timeout',
       require('./controllers/SettingsController.js')])
 .controller('RegisterController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/Registercontroller.js')])

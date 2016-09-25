@@ -41,12 +41,19 @@ module.exports = function(app){
     console.log('request to update user with id'+req.params.id+'. Request body:');
     console.log(JSON.stringify(req.body));
     let {username, calorie_budget, role, password} = sanitizeReqBody(req);
-    if (!username || !calorie_budget || !role ) {
+    if (!username || !calorie_budget ) {
       res.end(`Error: some fields were incorrect: ${JSON.stringify(req.body)}`);
       return;
     }
+    //if role field is absent, default to keeping role the same or regular user role
+    if (!role){
+      if (req.session.isAdmin && req.params.id === req.session.uid) role = `'admin'`;
+      else if (req.session.isUserAdmin && req.params.id === req.session.uid) role = `'user-admin'`;
+      else role = `'user'`
+    }
     let query, password_hash;
     if (password){
+      console.log("User PUT request with password change, new password is "+password);
       password_hash = "'"+bcrypt.hashSync(password, 6)+"'";
       query = `UPDATE users SET username=${username}, calorie_budget=${calorie_budget},
                   role=${role}, password_hash=${password_hash} WHERE id=${connection.escape(req.params.id)}`;
