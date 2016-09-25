@@ -1,4 +1,4 @@
-const app = angular.module('AuthApp', ['ngRoute']);
+const app = angular.module('CalorieCounterApp', ['ngRoute']);
 app.run(['$rootScope', '$location', '$route', 'userService',
   function ($rootScope, $location, $route, userService) {
     $rootScope.$on('$routeChangeStart',
@@ -30,9 +30,12 @@ app.run(['$rootScope', '$location', '$route', 'userService',
 })
 .factory('userService', ['$http',
       require('./services/userService.js')])
+.factory('entriesService', ['$http', 'userService',
+      require('./services/entriesService.js')])
+.directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
 .controller('RegisterController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/Registercontroller.js')])
-.controller('HomeController', ['$http', 'userService',
+.controller('HomeController', ['$scope','$http', 'userService', 'entriesService',
       require('./controllers/HomeController.js')]);

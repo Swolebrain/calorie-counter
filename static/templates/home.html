@@ -1,6 +1,14 @@
-<h2>xCalCount</h2>
+<h2 class='text-center'>Today's Cals: <span ng-class='totalCalsClass'>{{totalCals}}</span></h2>
 <div class="btn-group btn-group-justified">
-  <a href="#" class="btn btn-default">Previous</a>
-  <span>{{date}}</span>
-  <a href="#" class="btn btn-default">Next</a>
+  <a ng-click='decDate()' class="btn btn-default"><i class="fa fa-angle-left fa-3x" aria-hidden="true"></i></a>
+  <a class='btn btn-default'><large>{{date}}</large></a>
+  <a ng-click='incDate()' class="btn btn-default"><i class="fa fa-angle-right fa-3x" aria-hidden="true"></i></a>
+</div>
+<new-meal-directive date="date" update-meals='updateMeals()'></new-meal-directive>
+<div class='meal-entries'>
+  <div ng-repeat='meal in meals'>
+    <i class="fa fa-times fa-2x text-danger" ng-click='deleteMeal(meal.id)'></i>
+    <h2>{{meal.text}}</h2>
+    <h3>{{meal.time}}, {{meal.calories}} cals</h3>
+  </div>
 </div>

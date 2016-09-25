@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-const app = angular.module('AuthApp', ['ngRoute']);
+const app = angular.module('CalorieCounterApp', ['ngRoute']);
 app.run(['$rootScope', '$location', '$route', 'userService',
   function ($rootScope, $location, $route, userService) {
     $rootScope.$on('$routeChangeStart',
@@ -31,17 +31,75 @@ app.run(['$rootScope', '$location', '$route', 'userService',
 })
 .factory('userService', ['$http',
       require('./services/userService.js')])
+.factory('entriesService', ['$http', 'userService',
+      require('./services/entriesService.js')])
+.directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
 .controller('RegisterController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/Registercontroller.js')])
-.controller('HomeController', ['$http', 'userService',
+.controller('HomeController', ['$scope','$http', 'userService', 'entriesService',
       require('./controllers/HomeController.js')]);
 
-},{"./controllers/HomeController.js":2,"./controllers/LoginController.js":3,"./controllers/Registercontroller.js":4,"./services/userService.js":5}],2:[function(require,module,exports){
-module.exports = function($http, userService){
+},{"./controllers/HomeController.js":2,"./controllers/LoginController.js":3,"./controllers/Registercontroller.js":4,"./directives/NewMealDirective.js":5,"./services/entriesService.js":6,"./services/userService.js":7}],2:[function(require,module,exports){
+module.exports = function($scope, $http, userService, entriesService){
   console.log('Home controller reporting in');
+  $scope.meals = [];
+  $scope.totalCals = 0;
+  $scope.totalCalsClass = '';
+  $scope.date = getDate(0);
+  $scope.dayOffset = 0;
+  $scope.uid = userService
+  $scope.incDate = function(){
+    $scope.dayOffset += 1;
+    updateMeals();
+  };
+  $scope.decDate = function(){
+    $scope.dayOffset -= 1;
+    updateMeals();
+  };
+  $scope.updateMeals = updateMeals;
+  $scope.deleteMeal = deleteMeal;
+  updateMeals();
+
+  function deleteMeal(id){
+    entriesService.deleteEntry(id).success(res=>{
+      updateMeals();
+      console.log(res);
+    })
+    .error((data, err) => alert("Error communicating with server: "+data));
+  }
+  //function to update the $scope.meals array
+  function updateMeals(){
+    console.log('Running HomeController.updateMeals');
+    $scope.date = getDate($scope.dayOffset);
+    entriesService.getEntriesByDate(getDate($scope.dayOffset)).success(res=>{
+      $scope.meals = res;
+      computeTotalCals();
+      console.log(res);
+    })
+    .error((data, err)=>alert("Error communicating with server: "+data));
+  }
+  function computeTotalCals(){
+    $scope.totalCals = Array.prototype.reduce.call($scope.meals, (p,c)=>p+Number(c.calories) , 0);
+    if ($scope.totalCals > userService.getUserObject().calorie_budget)
+      $scope.totalCalsClass = 'text-danger';
+    else
+      $scope.totalCalsClass = 'text-success';
+  }
 };
+/*
+Function that returns a properly formatted date string based on a day offset
+eg with day offset -1, returns yesterday's date, with day offset +2, returns
+the day after tomorrow
+*/
+function getDate(dayOffset){
+  let date = new Date(new Date().getTime() + dayOffset*1000*60*60*24);
+  let day = date.getDate();
+  let month = date.getMonth()+1;
+  let year = date.getFullYear();
+  return year+'-'+month+'-'+day;
+}
 
 },{}],3:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, $location){
@@ -55,7 +113,7 @@ module.exports = function($scope, userService, $timeout, $location){
       return;
     }
     $scope.status = 'Logging in...';
-    userService.authenticate($scope.username, $scope.password).then(res=>{
+    userService.authenticate($scope.username, $scope.password).success(res=>{
       if (res.data)
         $scope.status = res.data;
       else
@@ -106,6 +164,96 @@ module.exports = function($scope, userService, $timeout, $location){
 };
 
 },{}],5:[function(require,module,exports){
+module.exports = function($timeout, entriesService){
+  return {
+    restrict: 'E',
+    scope:{
+      date: '=',
+      updateMeals : '&'
+    },
+    templateUrl: 'js/directives/newMealDirective.html',
+    link: function(scope, elem, attrs){
+      scope.newEntry = {};
+      scope.status = '';
+      scope.createMeal = function(){
+        scope.newEntry.date = scope.date;
+        if (!isValidCalories(scope.newEntry.calories) || !scope.newEntry.text || !isValidTime(scope.newEntry.time)){
+          scope.status = 'Some fields are incorrect';
+          $timeout(()=>scope.status='',2500);
+          return;
+        }
+        entriesService.addEntry(scope.newEntry).success(res=>{
+          if (res.insertId){
+            scope.status = 'Insertion succeeded!';
+            scope.updateMeals();
+            $timeout(()=>{
+              scope.status='';
+              scope.newEntry.calories = '';
+              scope.newEntry.text = '';
+              scope.newEntry.time = '';
+            },2500);
+          }
+          console.log(res);
+        })
+        .error((data, status)=>{
+          alert('Something went wrong when connecting to the server');
+        });
+      }
+    }
+  };
+};
+
+function isValidTime(timeStr){
+  timeStr = timeStr.trim();
+  if (timeStr.length == 0) return false;
+  let time = timeStr.split(':');
+  if (time.length != 3) return false;
+  let hours = parseInt(time[0],10);
+  let minutes = parseInt(time[1],10);
+  let ampm = time[2].toLowerCase();
+  return hours < 12 && hours >= 0 && minutes >= 0 && minutes < 60 && (ampm =='am' || ampm == 'pm');
+}
+
+function isValidCalories(cals){
+  return Number(cals) == cals;
+}
+
+},{}],6:[function(require,module,exports){
+
+module.exports = function($http, userService){
+  function getEntriesByDate(date){
+    if (!dateIsValid(date)) return 'Wrong date string';
+    else return $http.get('entries/'+date);
+  }
+  function deleteEntry(id){
+    return $http.delete('entries/'+id);
+  }
+  //receives {date, time, text, calories}
+  function addEntry(newEntry){
+    newEntry.uid = userService.getUserObject().id;
+    return $http.post('entries/', newEntry);
+  }
+  return {getEntriesByDate, deleteEntry, addEntry};
+};
+
+//validates that dateStr is formatted as yyyy-mm-dd or yyy-m-d
+function dateIsValid(dateStr){
+  if (!dateStr.match(/\d\d\d\d-[0-9]{1,2}-[0-9]{1,2}/)) return false;
+  let parts = dateStr.split('-');
+  let day = parseInt(parts[2], 10);
+  let month = parseInt(parts[1], 10);
+  let year = parseInt(parts[0], 10);
+  if(year < 1000 || year > 3000 || month == 0 || month > 12)
+        return false;
+  let monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+  // Adjust for leap years
+  if(year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
+      monthLength[1] = 29;
+  // Check the range of the day
+  return day > 0 && day <= monthLength[month - 1];
+}
+
+},{}],7:[function(require,module,exports){
 module.exports = function($http){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
@@ -136,7 +284,10 @@ module.exports = function($http){
   function isLoggedIn(){
     return userObject != null;
   }
-  return {authenticate, register, isLoggedIn};
+  function getUserObject(){
+    return userObject;
+  }
+  return {authenticate, register, isLoggedIn, getUserObject};
 };
 
 },{}]},{},[1]);

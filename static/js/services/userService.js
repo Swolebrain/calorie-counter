@@ -28,5 +28,8 @@ module.exports = function($http){
   function isLoggedIn(){
     return userObject != null;
   }
-  return {authenticate, register, isLoggedIn};
+  function getUserObject(){
+    return userObject;
+  }
+  return {authenticate, register, isLoggedIn, getUserObject};
 };

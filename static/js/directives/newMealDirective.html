@@ -1,0 +1,26 @@
+<form class='container' id='meal-input'>
+  <!-- date, time, text, calories, uid -->
+  <h2>Input New Meal</h2>
+  <div class="form-group col-lg-4">
+    <label for="time" class="control-label">Meal Time</label>
+    <div class="col-lg-10">
+      <input ng-model='newEntry.time' type="text" class="form-control" id="time" placeholder="Meal Time hh:mm:am/pm">
+    </div>
+  </div>
+  <div class="form-group col-lg-4">
+    <label for="text" class="control-label">Meal Description</label>
+    <div class="col-lg-10">
+      <input ng-model='newEntry.text' type="text" class="form-control" id="text" placeholder="Meal Description">
+    </div>
+  </div>
+  <div class="form-group col-lg-4">
+    <label for="calories" class="control-label">Meal Description</label>
+    <div class="col-lg-10">
+      <input ng-model='newEntry.calories' type="text" class="form-control" id="calories" placeholder="Meal Calories">
+    </div>
+  </div>
+  <div class='form-group text-center'>
+    <button ng-click='createMeal()' class='btn btn-primary'>Create New Entry</button>
+  </div>
+  <h2 class='text-center'>{{status}}</h2>
+</form>

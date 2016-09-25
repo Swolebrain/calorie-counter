@@ -1,3 +1,24 @@
 #status{
   transition: all 0.5s;
 }
+
+#meal-input{
+  margin: 3rem auto;
+  background-color: #c5d5d6;
+  border-color: #759596
+}
+
+.meal-entries > div{
+  margin: 1.5rem;
+  padding: 1rem;
+  background-color: #c8e8e8;
+  border: 1px solid #759596;
+  border-radius: 15px;
+  position:relative;
+}
+
+.meal-entries > div i{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
