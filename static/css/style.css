@@ -49,3 +49,7 @@ body{
   top: 5px;
   right: 5px;
 }
+
+.report .alert span{
+  float:right;
+}

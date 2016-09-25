@@ -8,6 +8,13 @@ module.exports = function(app){
     if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
     issueQuery(query, res, 'fetching entries by date');
   });
+  //main route for reports, get entries by date range
+  app.get('/entries/:start/:end', function (req,res){
+    let query = `SELECT * FROM entries WHERE date>=${connection.escape(req.params.start)}
+              AND date <=${connection.escape(req.params.end)}`;
+    if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
+    issueQuery(query, res, 'fetching entries by date range');
+  });
   //only admin access
   app.get('/entries', function(req,res){
     let query = `SELECT * FROM entries`;

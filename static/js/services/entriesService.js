@@ -4,6 +4,15 @@ module.exports = function($http, userService){
     if (!dateIsValid(date)) return 'Wrong date string';
     else return $http.get('entries/'+date);
   }
+  function getEntriesByDateRange(start, end){
+    if (!dateIsValid(start) || !dateIsValid(end)) return console.log('Wrong date range!');
+    else return $http.get('entries/'+start+'/'+end).success(res=>{
+      return res.forEach(entry=>{
+        //replace the annoying time string that comes from the server
+        entry.date = entry.date.split("T")[0];
+      });
+    });
+  }
   function deleteEntry(id){
     return $http.delete('entries/'+id);
   }
@@ -12,7 +21,7 @@ module.exports = function($http, userService){
     newEntry.uid = userService.getUserObject().id;
     return $http.post('entries/', newEntry);
   }
-  return {getEntriesByDate, deleteEntry, addEntry};
+  return {getEntriesByDate, deleteEntry, addEntry, getEntriesByDateRange};
 };
 
 //validates that dateStr is formatted as yyyy-mm-dd or yyy-m-d
