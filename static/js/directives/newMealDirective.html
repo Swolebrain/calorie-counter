@@ -2,7 +2,7 @@
   <!-- date, time, text, calories, uid -->
   <h2>Input New Meal</h2>
   <div class="form-group col-lg-4">
-    <label for="time" class="control-label">Meal Time</label>
+    <label for="time" class="control-label">Meal Time (hh:mm:am or hh:mm:pm)</label>
     <div class="col-lg-10">
       <input ng-model='newEntry.time' type="text" class="form-control" id="time" placeholder="Meal Time hh:mm:am/pm">
     </div>
@@ -22,5 +22,5 @@
   <div class='form-group text-center'>
     <button ng-click='createMeal()' class='btn btn-primary'>Create New Entry</button>
   </div>
-  <h2 class='text-center'>{{status}}</h2>
+  <h2 class='text-center' id='status'>{{status}}</h2>
 </form>

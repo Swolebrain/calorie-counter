@@ -28,7 +28,7 @@ app.run(['$rootScope', '$location', '$route', 'userService',
   })
   .otherwise({redirectTo: '/login'});
 })
-.factory('userService', ['$http',
+.factory('userService', ['$http', '$location',
       require('./services/userService.js')])
 .factory('entriesService', ['$http', 'userService',
       require('./services/entriesService.js')])

@@ -1,5 +1,13 @@
+#logout{
+  position:absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+}
 #status{
   transition: all 0.5s;
+  height: 2.25rem;
+  margin-bottom:3rem;
 }
 
 #meal-input{

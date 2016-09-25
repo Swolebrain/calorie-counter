@@ -29,7 +29,7 @@ app.run(['$rootScope', '$location', '$route', 'userService',
   })
   .otherwise({redirectTo: '/login'});
 })
-.factory('userService', ['$http',
+.factory('userService', ['$http', '$location',
       require('./services/userService.js')])
 .factory('entriesService', ['$http', 'userService',
       require('./services/entriesService.js')])
@@ -43,7 +43,6 @@ app.run(['$rootScope', '$location', '$route', 'userService',
 
 },{"./controllers/HomeController.js":2,"./controllers/LoginController.js":3,"./controllers/Registercontroller.js":4,"./directives/NewMealDirective.js":5,"./services/entriesService.js":6,"./services/userService.js":7}],2:[function(require,module,exports){
 module.exports = function($scope, $http, userService, entriesService){
-  console.log('Home controller reporting in');
   $scope.meals = [];
   $scope.totalCals = 0;
   $scope.totalCalsClass = '';
@@ -60,23 +59,21 @@ module.exports = function($scope, $http, userService, entriesService){
   };
   $scope.updateMeals = updateMeals;
   $scope.deleteMeal = deleteMeal;
+  $scope.logOut = logOut;
   updateMeals();
 
   function deleteMeal(id){
     entriesService.deleteEntry(id).success(res=>{
       updateMeals();
-      console.log(res);
     })
     .error((data, err) => alert("Error communicating with server: "+data));
   }
   //function to update the $scope.meals array
   function updateMeals(){
-    console.log('Running HomeController.updateMeals');
     $scope.date = getDate($scope.dayOffset);
     entriesService.getEntriesByDate(getDate($scope.dayOffset)).success(res=>{
       $scope.meals = res;
       computeTotalCals();
-      console.log(res);
     })
     .error((data, err)=>alert("Error communicating with server: "+data));
   }
@@ -86,6 +83,9 @@ module.exports = function($scope, $http, userService, entriesService){
       $scope.totalCalsClass = 'text-danger';
     else
       $scope.totalCalsClass = 'text-success';
+  }
+  function logOut(){
+    userService.logOut();
   }
 };
 /*
@@ -103,7 +103,6 @@ function getDate(dayOffset){
 
 },{}],3:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, $location){
-  console.log('login controller reporting in');
   $scope.status = '';
   $scope.auth = function(){
     $scope.username = $scope.username.trim();
@@ -177,8 +176,9 @@ module.exports = function($timeout, entriesService){
       scope.status = '';
       scope.createMeal = function(){
         scope.newEntry.date = scope.date;
-        if (!isValidCalories(scope.newEntry.calories) || !scope.newEntry.text || !isValidTime(scope.newEntry.time)){
-          scope.status = 'Some fields are incorrect';
+        let validationError = findInputErrors(scope.newEntry.calories, scope.newEntry.text, scope.newEntry.time);
+        if (validationError){
+          scope.status = validationError;
           $timeout(()=>scope.status='',2500);
           return;
         }
@@ -193,7 +193,6 @@ module.exports = function($timeout, entriesService){
               scope.newEntry.time = '';
             },2500);
           }
-          console.log(res);
         })
         .error((data, status)=>{
           alert('Something went wrong when connecting to the server');
@@ -204,18 +203,26 @@ module.exports = function($timeout, entriesService){
 };
 
 function isValidTime(timeStr){
-  timeStr = timeStr.trim();
-  if (timeStr.length == 0) return false;
+  if(!timeStr || timeStr.length < 2) return false;
+  timeStr = (""+timeStr).trim();
   let time = timeStr.split(':');
   if (time.length != 3) return false;
   let hours = parseInt(time[0],10);
   let minutes = parseInt(time[1],10);
   let ampm = time[2].toLowerCase();
-  return hours < 12 && hours >= 0 && minutes >= 0 && minutes < 60 && (ampm =='am' || ampm == 'pm');
+  return hours <= 12 && hours >= 0 && minutes >= 0 && minutes < 60 && (ampm =='am' || ampm == 'pm');
 }
 
 function isValidCalories(cals){
+  if (!cals) return false;
   return Number(cals) == cals;
+}
+//!isValidCalories(scope.newEntry.calories) || !scope.newEntry.text ||
+function findInputErrors(cals,text,time){
+  if (!isValidTime(time)) return "Invalid Time entry";
+  if (!text) return "Invalid description";
+  if (!isValidCalories(cals)) return "Invalid calorie entry"
+  return false;
 }
 
 },{}],6:[function(require,module,exports){
@@ -254,15 +261,19 @@ function dateIsValid(dateStr){
 }
 
 },{}],7:[function(require,module,exports){
-module.exports = function($http){
+module.exports = function($http, $location){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
   //When authenticated, this object contains {id, username, calorie_budget}
-  let userObject = null;
+  let userObject = localStorage.getItem("userObject");
+  if (userObject) userObject = JSON.parse(userObject);
+  else userObject = null;
   function authenticate(username, password){
     return $http.post(loginUri, {username, password}).success(res=>{
-      console.log(res);
-      if (res.id && res.calorie_budget && res.username) userObject = res;
+      if (res.id && res.calorie_budget && res.username) {
+        userObject = res;
+        localStorage.setItem("userObject", JSON.stringify(res));
+      }
       return res;
     }).error((data,status)=>alert('Error authenticating user:'+status))
   }
@@ -272,10 +283,10 @@ module.exports = function($http){
       if (res.affectedRows === 1){ //user was created
         let id = res.insertId;
         userObject = {id, username, calorie_budget };
+        localStorage.setItem("userObject", JSON.stringify(userObject));
         return res;
       }
       else{//user was not created
-        console.log('this is running');
         return res.data;
       }
     })
@@ -287,7 +298,13 @@ module.exports = function($http){
   function getUserObject(){
     return userObject;
   }
-  return {authenticate, register, isLoggedIn, getUserObject};
+  function logOut(){
+    localStorage.removeItem("userObject");
+    userObject = null;
+    console.log('logging out...');
+    $location.path('/login');
+  }
+  return {authenticate, register, isLoggedIn, getUserObject, logOut};
 };
 
 },{}]},{},[1]);

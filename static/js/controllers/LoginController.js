@@ -1,5 +1,4 @@
 module.exports = function($scope, userService, $timeout, $location){
-  console.log('login controller reporting in');
   $scope.status = '';
   $scope.auth = function(){
     $scope.username = $scope.username.trim();

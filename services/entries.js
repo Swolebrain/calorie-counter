@@ -2,9 +2,10 @@ const {connection, issueQuery, sanitizeReqBody} = require('./db.js');
 
 module.exports = function(app){
   //main route for app, get entries by date
-  //date should be formatted as yyy-mm-dd or yyy-m-d
+  //date should be formatted as yyy-mm-dd or yyyy-m-d
   app.get('/entries/:date', function (req,res){
     let query = `SELECT * FROM entries WHERE date='${req.params.date}'`;
+    if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
     issueQuery(query, res, 'fetching entries by date');
   });
   //only admin access
@@ -12,9 +13,10 @@ module.exports = function(app){
     let query = `SELECT * FROM entries`;
     issueQuery(query, res, 'fetching all entries');
   });
-  //accessible by admin or if req.params.id matches session id
+  //accessible by admin or any authenticated users
   app.get('/entries/:id', function(req,res){
     let query = `SELECT * FROM entries WHERE id=${connection.escape(req.params.id)}`;
+    if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
     issueQuery(query, res, 'fetching entry by id: '+req.params.id);
   });
   //accessible by admin or if req.params.id matches session id

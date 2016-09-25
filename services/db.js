@@ -38,7 +38,7 @@ function sanitizeReqBody(req){
 }
 
 function logError(err){
-  if (err.toString.includes('ER_DUP_ENTRY') ) return 'Username already exists.';
+  if (err.toString().includes('ER_DUP_ENTRY') ) return 'Username already exists.';
 }
 
 module.exports = {connection, issueQuery, sanitizeReqBody};

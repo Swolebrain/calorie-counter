@@ -1,5 +1,4 @@
 module.exports = function($scope, $http, userService, entriesService){
-  console.log('Home controller reporting in');
   $scope.meals = [];
   $scope.totalCals = 0;
   $scope.totalCalsClass = '';
@@ -16,23 +15,21 @@ module.exports = function($scope, $http, userService, entriesService){
   };
   $scope.updateMeals = updateMeals;
   $scope.deleteMeal = deleteMeal;
+  $scope.logOut = logOut;
   updateMeals();
 
   function deleteMeal(id){
     entriesService.deleteEntry(id).success(res=>{
       updateMeals();
-      console.log(res);
     })
     .error((data, err) => alert("Error communicating with server: "+data));
   }
   //function to update the $scope.meals array
   function updateMeals(){
-    console.log('Running HomeController.updateMeals');
     $scope.date = getDate($scope.dayOffset);
     entriesService.getEntriesByDate(getDate($scope.dayOffset)).success(res=>{
       $scope.meals = res;
       computeTotalCals();
-      console.log(res);
     })
     .error((data, err)=>alert("Error communicating with server: "+data));
   }
@@ -42,6 +39,9 @@ module.exports = function($scope, $http, userService, entriesService){
       $scope.totalCalsClass = 'text-danger';
     else
       $scope.totalCalsClass = 'text-success';
+  }
+  function logOut(){
+    userService.logOut();
   }
 };
 /*
