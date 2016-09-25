@@ -8,6 +8,14 @@
   border-color: #759596
 }
 
+.meal-entries{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
 .meal-entries > div{
   margin: 1.5rem;
   padding: 1rem;
@@ -15,6 +23,7 @@
   border: 1px solid #759596;
   border-radius: 15px;
   position:relative;
+  flex-basis: 300px;
 }
 
 .meal-entries > div i{
