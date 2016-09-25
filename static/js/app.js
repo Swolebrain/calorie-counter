@@ -14,27 +14,41 @@ app.run(['$rootScope', '$location', '$route', 'userService',
   .when('/login', {
     controller: 'LoginController',
     templateUrl: 'templates/login.html',
-      access: {restricted: false}
+    access: {restricted: false}
   })
   .when('/register', {
     controller: 'RegisterController',
     templateUrl: 'templates/register.html',
-      access: {restricted: false}
+    access: {restricted: false}
   })
   .when('/', {
     controller: 'HomeController',
     templateUrl: 'templates/home.html',
-      access: {restricted: true}
+    access: {restricted: true}
+  })
+  .when('/settings', {
+    controller: 'SettingsController',
+    templateUrl: 'templates/settings.html',
+    access: {restricted: true}
+  })
+  .when('/reports', {
+    controller: 'ReportsController',
+    templateUrl: 'templates/reports.html',
+    access: {restricted: true}
   })
   .otherwise({redirectTo: '/login'});
 })
-.factory('userService', ['$http', '$location',
+.factory('userService', ['$http', '$location', '$timeout',
       require('./services/userService.js')])
 .factory('entriesService', ['$http', 'userService',
       require('./services/entriesService.js')])
 .directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
+.controller('ReportsController', ['$scope', 'userService',
+      require('./controllers/ReportsController.js')])
+.controller('SettingsController', ['$scope', 'userService',
+      require('./controllers/SettingsController.js')])
 .controller('RegisterController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/Registercontroller.js')])
 .controller('HomeController', ['$scope','$http', 'userService', 'entriesService',

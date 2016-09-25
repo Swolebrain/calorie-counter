@@ -12,7 +12,7 @@ connection.connect(function(err){
   }
 });
 
-function issueQuery(query, res, errMessage){
+function issueQuery(query, res, errMessage, cb){
   console.log(`Attempting query: \n ${query}`);
   connection.query(query, function(err, rows, fields){
     if (err){
@@ -21,9 +21,11 @@ function issueQuery(query, res, errMessage){
     }
     else{
       console.log("Rows\n",JSON.stringify(rows));
-      console.log('fields:');
-      console.log(JSON.stringify(fields));
-      res.json(rows);
+      // console.log('fields:');
+      // console.log(JSON.stringify(fields));
+      if (!cb && !err)
+        return res.json(rows);
+      cb(err, rows);
     }
   });
 }

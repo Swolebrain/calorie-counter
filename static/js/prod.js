@@ -15,40 +15,92 @@ app.run(['$rootScope', '$location', '$route', 'userService',
   .when('/login', {
     controller: 'LoginController',
     templateUrl: 'templates/login.html',
-      access: {restricted: false}
+    access: {restricted: false}
   })
   .when('/register', {
     controller: 'RegisterController',
     templateUrl: 'templates/register.html',
-      access: {restricted: false}
+    access: {restricted: false}
   })
   .when('/', {
     controller: 'HomeController',
     templateUrl: 'templates/home.html',
-      access: {restricted: true}
+    access: {restricted: true}
+  })
+  .when('/settings', {
+    controller: 'SettingsController',
+    templateUrl: 'templates/settings.html',
+    access: {restricted: true}
+  })
+  .when('/reports', {
+    controller: 'ReportsController',
+    templateUrl: 'templates/reports.html',
+    access: {restricted: true}
   })
   .otherwise({redirectTo: '/login'});
 })
-.factory('userService', ['$http', '$location',
+.factory('userService', ['$http', '$location', '$timeout',
       require('./services/userService.js')])
 .factory('entriesService', ['$http', 'userService',
       require('./services/entriesService.js')])
 .directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
+.controller('ReportsController', ['$scope', 'userService',
+      require('./controllers/ReportsController.js')])
+.controller('SettingsController', ['$scope', 'userService',
+      require('./controllers/SettingsController.js')])
 .controller('RegisterController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/Registercontroller.js')])
 .controller('HomeController', ['$scope','$http', 'userService', 'entriesService',
       require('./controllers/HomeController.js')]);
 
-},{"./controllers/HomeController.js":2,"./controllers/LoginController.js":3,"./controllers/Registercontroller.js":4,"./directives/NewMealDirective.js":5,"./services/entriesService.js":6,"./services/userService.js":7}],2:[function(require,module,exports){
+},{"./controllers/HomeController.js":3,"./controllers/LoginController.js":4,"./controllers/Registercontroller.js":5,"./controllers/ReportsController.js":6,"./controllers/SettingsController.js":7,"./directives/NewMealDirective.js":8,"./services/entriesService.js":9,"./services/userService.js":10}],2:[function(require,module,exports){
+module.exports = function($scope, $timeout){
+  return {displayStatus, inputsAreFilled};
+
+  function displayStatus(status){
+    $scope.status=status;
+    $timeout(()=>$scope.status='',2500);
+  }
+  function inputsAreFilled(inputNames){
+    for(let i = 0; i< inputNames.length; i++){
+      if (!$scope[inputNames[i]]){
+        displayStatus('Please fill out all fields');
+        return false;
+      }
+      if (typeof($scope[inputNames[i]]) == 'string'){
+        $scope[inputNames[i]] = $scope[inputNames[i]].trim();
+        if (!$scope[inputNames[i]]){
+          displayStatus('Please fill out all fields');
+          return false;
+        }
+      }    
+    }
+    return true;
+    // if (!$scope.username || !$scope.password){
+    //   displayStatus('Please fill out all fields');
+    //   return false;
+    // }
+    // $scope.username = $scope.username.trim();
+    // $scope.password = $scope.password.trim();
+    // //check again after removing whitespace
+    // if (!$scope.username || !$scope.password){
+    //   return displayStatus('Please fill out all fields');
+    //   return false;
+    // }
+    // return true;
+  }
+};
+
+},{}],3:[function(require,module,exports){
 module.exports = function($scope, $http, userService, entriesService){
   $scope.meals = [];
   $scope.totalCals = 0;
   $scope.totalCalsClass = '';
   $scope.date = getDate(0);
   $scope.dayOffset = 0;
-  $scope.uid = userService
+  $scope.user = userService.getUserObject();
   $scope.incDate = function(){
     $scope.dayOffset += 1;
     updateMeals();
@@ -101,11 +153,12 @@ function getDate(dayOffset){
   return year+'-'+month+'-'+day;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, $location){
+  let {displayStatus, inputsAreFilled} = require('../common/common.js')($scope, $timeout);
   $scope.status = '';
   $scope.auth = function(){
-    if (!inputsAreFilled()) return;
+    if (!inputsAreFilled(['username', 'password'])) return;
     $scope.status = 'Logging in...';
     userService.authenticate($scope.username, $scope.password).success(res=>{
       if (res.data)
@@ -125,59 +178,48 @@ module.exports = function($scope, userService, $timeout, $location){
     // });
   };
 
-
-  function displayStatus(status){
-
-    $timeout(()=>$scope.status='',2500);
-  }
-  function inputsAreFilled(){
-    if (!$scope.username || !$scope.password){
-      displayStatus('Please fill out all fields');
-      return false;
-    }
-    $scope.username = $scope.username.trim();
-    $scope.password = $scope.password.trim();
-    //check again after removing whitespace
-    if (!$scope.username || !$scope.password){
-      return displayStatus('Please fill out all fields');
-      return false;
-    }
-    return true;
-  }
 };
 
-},{}],4:[function(require,module,exports){
+},{"../common/common.js":2}],5:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, $location){
-  console.log('register controller reporting in');
+  let {displayStatus, inputsAreFilled} = require('../common/common.js')($scope, $timeout);
+
   $scope.status = '';
   $scope.register = function(){
-    let u = $scope.username.toString().trim();
-    let p = $scope.password.toString().trim();
-    let calorie_budget = $scope.calorie_budget.toString().trim();
-    if (p != $scope.passwordConf){ //already trimmed password
+    if (!inputsAreFilled(['username', 'password', 'passwordConf', 'calorie_budget'])) return;
+    if ($scope.password != $scope.passwordConf){ //already trimmed password
       $scope.status = "Passwords don't match!";
       return;
     }
-    if (!u || !p || !calorie_budget ){
-      $scope.status = 'Please fill out all fields';
-      return;
-    }
     $scope.status = 'Registering...';
-    userService.register(u, p, calorie_budget).success(res=>{
-      console.log(res);
+    userService.register($scope.username, $scope.password, $scope.calorie_budget).success(res=>{
+      //console.log(res);
       if (typeof(res) == 'string' && res.slice(0,5) == 'Error'){
         $scope.status = res;
         $timeout(()=>$scope.status='',2500);
       }
       else{
-        //successfully logged in, redirect to /
-        $location.path('/');
+        $scope.status = 'Successfully registered! Redirecting...';
+        $timeout(()=>$location.path('/login'),1500);
       }
     });
   };
 };
 
-},{}],5:[function(require,module,exports){
+},{"../common/common.js":2}],6:[function(require,module,exports){
+module.exports = function($scope, userService){
+  console.log('ReportsController reporting in');
+  $scope.logOut = ()=>userService.logOut();
+};
+
+},{}],7:[function(require,module,exports){
+module.exports = function($scope, userService){
+  console.log('ReportsController reporting in');
+
+  $scope.logOut = ()=>userService.logOut();
+};
+
+},{}],8:[function(require,module,exports){
 module.exports = function($timeout, entriesService){
   return {
     restrict: 'E',
@@ -240,7 +282,7 @@ function findInputErrors(cals,text,time){
   return false;
 }
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 module.exports = function($http, userService){
   function getEntriesByDate(date){
@@ -275,7 +317,7 @@ function dateIsValid(dateStr){
   return day > 0 && day <= monthLength[month - 1];
 }
 
-},{}],7:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function($http, $location){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
@@ -294,17 +336,6 @@ module.exports = function($http, $location){
   }
   function register(username, password, calorie_budget){
     return $http.post(registerUri, {username, password, calorie_budget})
-    .success(res=>{
-      if (res.affectedRows === 1){ //user was created
-        let id = res.insertId;
-        userObject = {id, username, calorie_budget };
-        localStorage.setItem("userObject", JSON.stringify(userObject));
-        return res;
-      }
-      else{//user was not created
-        return res.data;
-      }
-    })
     .error((data, status) => alert('Error connecting to server:'+status));
   }
   function isLoggedIn(){

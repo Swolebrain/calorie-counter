@@ -1,8 +1,18 @@
-#logout{
+body{
+  overflow-x: hidden;
+}
+#user-menu{
   position:absolute;
   top: 1rem;
   right: 1rem;
-  z-index: 2;
+}
+#user-menu span, #user-menu a{
+  margin-left: 1rem;
+}
+#greeting{
+  position:absolute;
+  top: 1rem;
+  left: 1rem;
 }
 #status{
   transition: all 0.5s;

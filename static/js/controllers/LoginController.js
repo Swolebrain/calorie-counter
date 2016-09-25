@@ -1,7 +1,8 @@
 module.exports = function($scope, userService, $timeout, $location){
+  let {displayStatus, inputsAreFilled} = require('../common/common.js')($scope, $timeout);
   $scope.status = '';
   $scope.auth = function(){
-    if (!inputsAreFilled()) return;
+    if (!inputsAreFilled(['username', 'password'])) return;
     $scope.status = 'Logging in...';
     userService.authenticate($scope.username, $scope.password).success(res=>{
       if (res.data)
@@ -21,23 +22,4 @@ module.exports = function($scope, userService, $timeout, $location){
     // });
   };
 
-
-  function displayStatus(status){
-
-    $timeout(()=>$scope.status='',2500);
-  }
-  function inputsAreFilled(){
-    if (!$scope.username || !$scope.password){
-      displayStatus('Please fill out all fields');
-      return false;
-    }
-    $scope.username = $scope.username.trim();
-    $scope.password = $scope.password.trim();
-    //check again after removing whitespace
-    if (!$scope.username || !$scope.password){
-      return displayStatus('Please fill out all fields');
-      return false;
-    }
-    return true;
-  }
 };

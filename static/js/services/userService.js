@@ -16,17 +16,6 @@ module.exports = function($http, $location){
   }
   function register(username, password, calorie_budget){
     return $http.post(registerUri, {username, password, calorie_budget})
-    .success(res=>{
-      if (res.affectedRows === 1){ //user was created
-        let id = res.insertId;
-        userObject = {id, username, calorie_budget };
-        localStorage.setItem("userObject", JSON.stringify(userObject));
-        return res;
-      }
-      else{//user was not created
-        return res.data;
-      }
-    })
     .error((data, status) => alert('Error connecting to server:'+status));
   }
   function isLoggedIn(){

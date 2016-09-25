@@ -4,7 +4,7 @@ module.exports = function($scope, $http, userService, entriesService){
   $scope.totalCalsClass = '';
   $scope.date = getDate(0);
   $scope.dayOffset = 0;
-  $scope.uid = userService
+  $scope.user = userService.getUserObject();
   $scope.incDate = function(){
     $scope.dayOffset += 1;
     updateMeals();
