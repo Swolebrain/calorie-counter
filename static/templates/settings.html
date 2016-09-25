@@ -4,4 +4,29 @@
   <a href='#/settings' class="label label-info">Settings</a>
   <span class="label label-primary" ng-click='logOut()'>Log Out</span>
 </span>
-<h2>Settings</h2>
+<form class='container' id='meal-input'>
+
+  <h2>Settings for {{user.username}}</h2>
+  <div class="form-group col-lg-4">
+    <label for="calories" class="control-label">Set Your Daily Calorie Goal:</label>
+    <div class="col-lg-10">
+      <input ng-model='newUserData.calorie_budget' type="number" class="form-control" placeholder="Daily Calories">
+    </div>
+  </div>
+  <div class="form-group col-lg-4">
+    <label for="time" class="control-label">New Password</label>
+    <div class="col-lg-10">
+      <input ng-model='newUserData.password' type="text" class="form-control" placeholder="New Password">
+    </div>
+  </div>
+  <div class="form-group col-lg-4">
+    <label for="text" class="control-label">New Password Confirmation</label>
+    <div class="col-lg-10">
+      <input ng-model='newUserData.passwordConf' type="text" class="form-control" placeholder="New Password Confirmation">
+    </div>
+  </div>
+  <div class='form-group text-center'>
+    <button ng-click='updateUser()' class='btn btn-primary'>Create New Entry</button>
+  </div>
+  <h2 class='text-center' id='status'>{{status}}</h2>
+</form>
