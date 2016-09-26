@@ -34,9 +34,10 @@
       <h3 id='status'>{{status}}</h3>
     </div>
   </div>
-  <div class=' rowreport'>
-    <div ng-repeat='summary in summaryEntries' class='col-lg-6 col-lg-offset-3'>
-      <h3 class='alert alert-info'>Date: {{summary.date}} <span>Calories: {{summary.calories}}</span></h3>
+  <div class='row report'>
+    <div ng-repeat='summary in summaryEntries' class='col-lg-8 col-lg-offset-2 alert alert-info'>
+      <h3>Date: {{summary.date}} </h3>
+      <h3>Calories: {{summary.calories}}</h3>
     </div>
   </div>
 </div>

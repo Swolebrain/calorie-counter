@@ -50,6 +50,11 @@ body{
   right: 5px;
 }
 
-.report .alert span{
-  float:right;
+.report > div{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.report > div h3{
+  margin: 1rem 0;
 }

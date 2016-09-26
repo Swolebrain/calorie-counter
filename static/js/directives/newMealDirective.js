@@ -21,11 +21,11 @@ module.exports = function($timeout, entriesService){
           if (res.insertId){
             scope.status = 'Insertion succeeded!';
             scope.updateMeals();
+            scope.newEntry.calories = '';
+            scope.newEntry.text = '';
+            scope.newEntry.time = '';
             $timeout(()=>{
               scope.status='';
-              scope.newEntry.calories = '';
-              scope.newEntry.text = '';
-              scope.newEntry.time = '';
             },2500);
           }
         })

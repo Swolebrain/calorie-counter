@@ -2,8 +2,9 @@ const {connection, issueQuery, sanitizeReqBody} = require('./db.js');
 
 module.exports = function(app){
   //main route for app, get entries by date
-  //date should be formatted as yyy-mm-dd or yyyy-m-d
+  //date should be formatted as yyy-mm-dd, not yyyy-m-d
   app.get('/entries/:date', function (req,res){
+    console.log('Received query for entries');
     let query = `SELECT * FROM entries WHERE date='${req.params.date}'`;
     if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
     issueQuery(query, res, 'fetching entries by date');
@@ -17,6 +18,7 @@ module.exports = function(app){
   });
   //only admin access
   app.get('/entries', function(req,res){
+    if (!req.session.isAdmin) return res.end('Error: You must be an admin for that');
     let query = `SELECT * FROM entries`;
     issueQuery(query, res, 'fetching all entries');
   });
@@ -40,17 +42,17 @@ module.exports = function(app){
     }
     let query = `UPDATE entries SET date=${date}, time=${time}, text=${text}, calories=${calories}
                 WHERE id=${connection.escape(req.params.id)}`;
+    if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
     issueQuery(query, res, `modifying entry ${req.params.id} for ${uid}`);
   });
   //accessible by admin or if req.params.id matches session id
   //requires ALL in fields to be re-sent in body
-  app.post('/entries', function(req,res){
+  app.post('/entries', authPost, function(req,res){
     console.log('request body:');
     console.log(JSON.stringify(req.body));
     let {date, time, text, calories, uid} = sanitizeReqBody(req);
     if (!date || !time || !text || !calories || !uid) {
-      res.end(`Error: some fields were incorrect: ${JSON.stringify(req.body)}`);
-      return;
+      return res.end(`Error: some fields were incorrect: ${JSON.stringify(req.body)}`);
     }
     let query = `INSERT INTO entries (date, time, text, calories, uid)
                   VALUES (${date}, ${time}, ${text}, ${calories}, ${uid})`;
@@ -59,6 +61,16 @@ module.exports = function(app){
   //accessible by admin or if req.params.id matches session id
   app.delete('/entries/:id', function(req,res){
     let query = `DELETE FROM entries WHERE id=${connection.escape(req.params.id)}`;
+    if (!req.session.isAdmin) query += ` AND uid=${connection.escape(req.session.uid)}`;
     issueQuery(query, res, 'deleting entry with id '+req.params.id);
   });
 };
+
+//middleware to protect post route
+function authPost(req, res, next){
+  if (!req.session || !req.session.isAuthenticated)
+    res.end('Error: You need to be logged in for that');
+  else if (req.body.uid == req.session.uid || req.session.isAdmin)
+    return next();
+  return res.end('Error: You need to be logged in for that');
+}

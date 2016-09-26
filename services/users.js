@@ -19,6 +19,7 @@ module.exports = function(app){
         req.session.isAuthenticated = true;
         res.json({ id, username, calorie_budget});
         if (rows[0].role == 'admin') req.session.isAdmin = true;
+        else if (rows[0].role == 'user-admin') req.session.isUserAdmin = true;
       }
       else{
         res.end('Error: password is wrong');
@@ -27,17 +28,18 @@ module.exports = function(app){
   });
   //accessible by admin only
   app.get('/users', function(req,res){
+    if (!req.session.isAdmin) return res.send(401);
     let query = `SELECT * FROM users`;
     issueQuery(query, res, 'fetching all entries');
   });
   //accessible by admin or if req.params.id matches session id
-  app.get('/users/:id', function(req,res){
+  app.get('/users/:id', authAdminOrOwner, function(req,res){
     let query = `SELECT * FROM users WHERE id=${connection.escape(req.params.id)}`;
     issueQuery(query, res, 'fetching all entries');
   });
   //accessible by admin or if req.params.id matches session id
   //doesn't require sending password
-  app.put('/users/:id', function(req,res){
+  app.put('/users/:id', authAdminOrOwner, function(req,res){
     console.log('request to update user with id'+req.params.id+'. Request body:');
     console.log(JSON.stringify(req.body));
     let {username, calorie_budget, role, password} = sanitizeReqBody(req);
@@ -45,7 +47,7 @@ module.exports = function(app){
       res.end(`Error: some fields were incorrect: ${JSON.stringify(req.body)}`);
       return;
     }
-    //if role field is absent, default to keeping role the same or regular user role
+    //if role field is absent, default to keeping role the same role or regular user role
     if (!role){
       if (req.session.isAdmin && req.params.id === req.session.uid) role = `'admin'`;
       else if (req.session.isUserAdmin && req.params.id === req.session.uid) role = `'user-admin'`;
@@ -64,7 +66,7 @@ module.exports = function(app){
     }
     issueQuery(query, res, 'updating user data for '+req.params.id)
   });
-  //accessible by everyone. TODO: Only admins can create admins
+  //accessible by everyone.
   //requires sending password (duh)
   //response.insertId contains the database id of newly created user
   app.post('/users', function(req,res){
@@ -93,9 +95,17 @@ module.exports = function(app){
     }
   });
   //accessible by admin or if req.params.id matches session id
-  app.delete('/users/:id', function(req,res){
+  app.delete('/users/:id', authAdminOrOwner, function(req,res){
     console.log('request to delete user with id'+req.params.id);
     let query = `DELETE FROM users WHERE id=${connection.escape(req.params.id)}`;
     issueQuery(query, res, 'deleting user with id: '+req.params.id);
   });
 };
+
+function authAdminOrOwner(req, res, next){
+  if (req.session && req.session.isAuthenticated){
+    if (req.session.isAdmin || req.session.isUserAdmin) return next();
+    if (req.session.uid == req.params.id) return next();
+  }
+  res.send(401)
+}
