@@ -1,25 +1,21 @@
 module.exports = function($scope, userService, $timeout, entriesService){
-  console.log('ReportsController reporting in');
   const displayStatus = require('../common/common.js')($scope, $timeout).displayStatus;
   $scope.logOut = ()=>userService.logOut();
   $scope.summaryEntries = [];
   $scope.showReport = function(){
     let {formStartDate:startDate, formEndDate: endDate,
       formStartTime: startTime, formEndTime: endTime} = $scope;
-    if (!endTime) endTime = '11:59:pm';
+    if (!endTime) endTime = '23:59:pm';
     if (!startTime) startTime = '00:00:am';
     if (!startDate || !endDate){
       return displayStatus('Please select at least start and end dates')
     }
     startDate = formatDate(startDate);
     endDate = formatDate(endDate);
-    console.log(startTime);
-    console.log(endTime);
     startTime = formatTime(startTime);
     endTime = formatTime(endTime);
     entriesService.getEntriesByDateRange(startDate, endDate).then(res=>{
       $scope.summaryEntries = [];
-      console.log(res);
       //here we filter by start time and end time
       let ctr = 0;
       for (var day = new Date(startDate); day <= new Date(endDate); day.setDate(day.getDate()+1)){
@@ -63,23 +59,24 @@ function formatTime(timeStr){
   Returns 0 if entry is not within startTime and endTime
 */
 function getCalories(entry, startTime, endTime){
+  //console.log(`Seeing if ${entry.time} is within ${startTime} and ${endTime}`);
   let entryTime = convertToMilitaryTime(entry.time.split(":"));
-  console.log(`Comparing ${entryTime} to ${startTime}, ${endTime}`);
   startTime = convertToMilitaryTime(startTime.split(":"));
   endTime = convertToMilitaryTime(endTime.split(":"));
+  //console.log(`Seeing if ${entryTime} is within ${startTime} and ${endTime}`);
   if (entryTime >= startTime && entryTime <= endTime){
-    console.log(`Found it in range, returning ${entry.calories}`);
+    //console.log('returning '+entry.calories);
     return entry.calories;
   }
   else {
-    console.log('Found it out of range, returning 0');
+    //console.log('returning 0');
     return 0;
   }
 }
 
 function convertToMilitaryTime(timeArr){
   let ret;
-  if (timeArr[2] == 'pm' && Number(timeArr[1]) < 12)
+  if (timeArr[2] == 'pm' && Number(timeArr[0]) < 12)
     ret = (12+ Number(timeArr[0]))+":"+ ("0"+timeArr[1]).slice(-2);
   else ret = ("0"+timeArr[0]).slice(-2) + ":" + ("0"+timeArr[1]).slice(-2);
   return ret;

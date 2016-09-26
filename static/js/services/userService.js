@@ -2,14 +2,14 @@ module.exports = function($http, $location){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
   //When authenticated, this object contains {id, username, calorie_budget}
-  let userObject = localStorage.getItem("userObject");
+  let userObject = null; //localStorage.getItem("userObject");
   if (userObject) userObject = JSON.parse(userObject);
   else userObject = null;
   function authenticate(username, password){
     return $http.post(loginUri, {username, password}).success(res=>{
       if (res.id && res.calorie_budget && res.username) {
         userObject = res;
-        localStorage.setItem("userObject", JSON.stringify(res));
+        //localStorage.setItem("userObject", JSON.stringify(res));
       }
       return res;
     }).error((data,status)=>alert('Error authenticating user:'+status))
@@ -23,9 +23,8 @@ module.exports = function($http, $location){
   function updateUser(userObj){
     return $http.put('users/'+userObj.id, userObj).success(res=>{
       if (res.affectedRows === 1) {
-        console.log('saw affectedRows == 1');
         userObject.calorie_budget = userObj.calorie_budget;
-        localStorage.setItem("userObject", JSON.stringify(userObject));
+        //localStorage.setItem("userObject", JSON.stringify(userObject));
       }
       return res;
     });
@@ -37,7 +36,7 @@ module.exports = function($http, $location){
     return userObject;
   }
   function logOut(){
-    localStorage.removeItem("userObject");
+    //localStorage.removeItem("userObject");
     userObject = null;
     console.log('logging out...');
     $location.path('/login');

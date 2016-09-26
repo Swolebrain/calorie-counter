@@ -51,8 +51,8 @@ the day after tomorrow
 */
 function getDate(dayOffset){
   let date = new Date(new Date().getTime() + dayOffset*1000*60*60*24);
-  let day = date.getDate();
-  let month = date.getMonth()+1;
+  let day = ("0"+date.getDate()).slice(-2);
+  let month = ("0"+(date.getMonth()+1)).slice(-2);
   let year = date.getFullYear();
   return year+'-'+month+'-'+day;
 }
