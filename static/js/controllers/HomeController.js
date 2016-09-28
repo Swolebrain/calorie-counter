@@ -14,16 +14,10 @@ module.exports = function($scope, userService, entriesService){
     updateMeals();
   };
   $scope.updateMeals = updateMeals;
-  $scope.deleteMeal = deleteMeal;
   $scope.logOut = logOut;
   updateMeals();
 
-  function deleteMeal(id){
-    entriesService.deleteEntry(id).success(res=>{
-      updateMeals();
-    })
-    .error((data, err) => alert("Error communicating with server: "+data));
-  }
+
   //function to update the $scope.meals array
   function updateMeals(){
     $scope.date = getDate($scope.dayOffset);

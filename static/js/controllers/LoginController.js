@@ -10,16 +10,13 @@ module.exports = function($scope, userService, $timeout, $location){
       else
         $scope.status = res;
       if (typeof(res) == 'string' && res.slice(0,5) == 'Error'){
-        $timeout(()=>$scope.status='',2500);
+        return $timeout(()=>$scope.status='',2500);
       }
-      else{
-        //successfully logged in, redirect to /
-        $location.path('/');
-      }
+      //successfully logged in, redirect to /
+      if (userService.isAdmin()) return $location.path('/admin');
+      else if (userService.isUserAdmin()) return $location.path('/user-admin');
+      else $location.path('/');
     });
-    // .error((data, status)=>{
-    //   $scope.status = 'Failed connecting to server. '+data+' '+status;
-    // });
   };
 
 };

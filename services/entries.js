@@ -18,6 +18,7 @@ module.exports = function(app){
   });
   //only admin access
   app.get('/entries', function(req,res){
+    console.log('Received request for all entries');
     if (!req.session.isAdmin) return res.end('Error: You must be an admin for that');
     let query = `SELECT * FROM entries`;
     issueQuery(query, res, 'fetching all entries');

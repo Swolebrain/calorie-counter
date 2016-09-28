@@ -1,1 +1,16 @@
-<h1>Admin Template</h1>
+<span id='user-menu'>
+  <a href='#/' class="label label-info">Regular User</a>
+  <a href='#/admin' class="label label-info">Super Admin</a>
+  <a href='#/user-admin' class="label label-info">User Admin</a>
+  <span class="label label-primary" ng-click='logOut()'>Log Out</span>
+</span>
+<h1>Admin Panel</h1>
+<p>This page is just to manage entries. Look up a user id first in the user management
+  page if you want to manage someone's meals</p>
+<h2>{{status}}</h2>
+<div class='meal-entries'>
+  <div ng-repeat='meal in meals'>
+    <span>UID: {{meal.uid}}</span>
+    <meal-display meal='meal' update-meals='updateMeals()'></meal-display>
+  </div>
+</div>

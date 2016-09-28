@@ -1,1 +1,47 @@
-<h1>user admin template</h1>
+<span id='user-menu'>
+  <a href='#/' class="label label-info">Regular User</a>
+  <a href='#/admin' class="label label-info">Super Admin</a>
+  <a href='#/user-admin' class="label label-info">User Admin</a>
+  <span class="label label-primary" ng-click='logOut()'>Log Out</span>
+</span>
+<h1>User Administration</h1>
+<form class='container' id='create-user'>
+  <!-- date, time, text, calories, uid -->
+  <h2>Create New User</h2>
+  <fieldset>
+    <div class="form-group">
+      <label for='username' class='control-label col-md-2'>User Name:</label>
+      <div class="col-md-10">
+        <input type='text' id='username' ng-model='newUser.username' class='form-control' placeholder="User Name"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for='password' class='control-label col-md-2'>Password:</label>
+      <div class="col-md-10">
+        <input type='password' ng-model='newUser.password' id='password' class='form-control' placeholder="Password"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for='password-conf' class='control-label col-md-2'>User Role</label>
+      <div class="col-md-10">
+        <select class="form-control" ng-model='newUser.role'>
+          <option value='user'>Regular User</option>
+          <option value="user-admin">User Administrator</option>
+          <option value="admin">Global Administrator</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for='calorie-budget' class='control-label col-md-2'>Calorie Budget:</label>
+      <div class="col-md-10">
+        <input type='number' ng-model='newUser.calorie_budget' id='calorie-budget' class='form-control' placeholder="Daily Calorie Budget"/>
+      </div>
+    </div>
+  </fieldset>
+  <div class='text-center'>
+    <button class='btn btn-primary' ng-click='create()'>Create User</button>
+  </div>
+  <div class='text-center'>
+    <h3 id='status'>{{status}}</h3>
+  </div>
+</form>

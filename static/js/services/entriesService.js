@@ -1,5 +1,9 @@
 
 module.exports = function($http, userService){
+  function getAllEntries(){
+    if (!userService.isAdmin()) return [];
+    return $http.get('entries/');
+  }
   function getEntriesByDate(date){
     if (!dateIsValid(date)) return 'Wrong date string';
     else return $http.get('entries/'+date);
@@ -21,7 +25,7 @@ module.exports = function($http, userService){
     newEntry.uid = userService.getUserObject().id;
     return $http.post('entries/', newEntry);
   }
-  return {getEntriesByDate, deleteEntry, addEntry, getEntriesByDateRange};
+  return {getEntriesByDate, deleteEntry, addEntry, getEntriesByDateRange, getAllEntries};
 };
 
 //validates that dateStr is formatted as yyyy-mm-dd or yyy-m-d

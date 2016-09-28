@@ -65,7 +65,8 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./services/userService.js')])
 .factory('entriesService', ['$http', 'userService',
       require('./services/entriesService.js')])
-.directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
+.directive('newMeal', ['$timeout', 'entriesService', require('./directives/newMealDirective.js')])
+.directive('mealDisplay', ['$timeout', 'entriesService', require('./directives/mealDisplayDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
 .controller('ReportsController', ['$scope', 'userService', '$timeout', 'entriesService',
@@ -76,12 +77,12 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./controllers/Registercontroller.js')])
 .controller('HomeController', ['$scope', 'userService', 'entriesService',
       require('./controllers/HomeController.js')])
-.controller('AdminController', ['$scope', 'userService', 'entriesService',
+.controller('AdminController', ['$scope', 'entriesService',
       require('./controllers/AdminController.js')])
-.controller('UserAdminController', ['$scope', 'userService', 'entriesService',
+.controller('UserAdminController', ['$scope', 'userService', 'entriesService', '$timeout', 
       require('./controllers/UserAdminController.js')]);
 
-},{"./controllers/AdminController.js":3,"./controllers/HomeController.js":4,"./controllers/LoginController.js":5,"./controllers/Registercontroller.js":6,"./controllers/ReportsController.js":7,"./controllers/SettingsController.js":8,"./controllers/UserAdminController.js":9,"./directives/NewMealDirective.js":10,"./services/entriesService.js":11,"./services/userService.js":12}],2:[function(require,module,exports){
+},{"./controllers/AdminController.js":3,"./controllers/HomeController.js":4,"./controllers/LoginController.js":5,"./controllers/Registercontroller.js":6,"./controllers/ReportsController.js":7,"./controllers/SettingsController.js":8,"./controllers/UserAdminController.js":9,"./directives/mealDisplayDirective.js":10,"./directives/newMealDirective.js":11,"./services/entriesService.js":12,"./services/userService.js":13}],2:[function(require,module,exports){
 module.exports = function($scope, $timeout){
   return {displayStatus, inputsAreFilled};
 
@@ -120,8 +121,14 @@ module.exports = function($scope, $timeout){
 };
 
 },{}],3:[function(require,module,exports){
-module.exports = function($scope, userService, entriesService){
-  console.log("Admin controller reporting in");
+module.exports = function($scope, entriesService){
+  $scope.meals = [];
+  $scope.status = "";
+  entriesService.getAllEntries().success(res=>{
+    if (typeof(res) === 'string') return $scope.status = 'Unauthorized';
+    $scope.meals = res;
+  })
+  .error((err, data)=>alert("Error communicating with server: "+data+", "+error));
 };
 
 },{}],4:[function(require,module,exports){
@@ -141,16 +148,10 @@ module.exports = function($scope, userService, entriesService){
     updateMeals();
   };
   $scope.updateMeals = updateMeals;
-  $scope.deleteMeal = deleteMeal;
   $scope.logOut = logOut;
   updateMeals();
 
-  function deleteMeal(id){
-    entriesService.deleteEntry(id).success(res=>{
-      updateMeals();
-    })
-    .error((data, err) => alert("Error communicating with server: "+data));
-  }
+
   //function to update the $scope.meals array
   function updateMeals(){
     $scope.date = getDate($scope.dayOffset);
@@ -197,16 +198,13 @@ module.exports = function($scope, userService, $timeout, $location){
       else
         $scope.status = res;
       if (typeof(res) == 'string' && res.slice(0,5) == 'Error'){
-        $timeout(()=>$scope.status='',2500);
+        return $timeout(()=>$scope.status='',2500);
       }
-      else{
-        //successfully logged in, redirect to /
-        $location.path('/');
-      }
+      //successfully logged in, redirect to /
+      if (userService.isAdmin()) return $location.path('/admin');
+      else if (userService.isUserAdmin()) return $location.path('/user-admin');
+      else $location.path('/');
     });
-    // .error((data, status)=>{
-    //   $scope.status = 'Failed connecting to server. '+data+' '+status;
-    // });
   };
 
 };
@@ -348,11 +346,44 @@ module.exports = function($scope, userService, $timeout){
 };
 
 },{"../common/common.js":2}],9:[function(require,module,exports){
-module.exports = function($scope, userService, entriesService){
-  console.log("User admin controller reporting in");
+module.exports = function($scope, userService, entriesService, $timeout){
+  $scope.newUser = {role: 'user'};
+  $scope.create = createUser;
+  $scope.logOut = ()=>userService.logOut();
+
+  function createUser(){
+    $scope.status = 'Registering...';
+    let {username, password, calorie_budget, role} = $scope.newUser;
+    userService.register(username, password, calorie_budget, role)
+    .success(res=>{
+      $scope.status = res;
+      $timeout(()=>$scope.status='',2500);
+    })
+    .error((data,err)=>alert('Error connecting to server. '+data+'. '+err));
+  }
 };
 
 },{}],10:[function(require,module,exports){
+module.exports = function($timeout, entriesService){
+  return {
+    restrict: 'E',
+    scope: {
+      meal: '=',
+      updateMeals: '&'
+    },
+    templateUrl: 'js/directives/mealDisplayDirective.html',
+    link: function(scope, elem, attrs){
+      scope.deleteMeal = function(){
+        entriesService.deleteEntry(scope.meal.id).success(res=>{
+          scope.updateMeals();
+        })
+        .error((data, err) => alert("Error communicating with server: "+data));
+      };
+    }
+  };
+};
+
+},{}],11:[function(require,module,exports){
 module.exports = function($timeout, entriesService){
   return {
     restrict: 'E',
@@ -415,9 +446,13 @@ function findInputErrors(cals,text,time){
   return false;
 }
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 module.exports = function($http, userService){
+  function getAllEntries(){
+    if (!userService.isAdmin()) return [];
+    return $http.get('entries/');
+  }
   function getEntriesByDate(date){
     if (!dateIsValid(date)) return 'Wrong date string';
     else return $http.get('entries/'+date);
@@ -439,7 +474,7 @@ module.exports = function($http, userService){
     newEntry.uid = userService.getUserObject().id;
     return $http.post('entries/', newEntry);
   }
-  return {getEntriesByDate, deleteEntry, addEntry, getEntriesByDateRange};
+  return {getEntriesByDate, deleteEntry, addEntry, getEntriesByDateRange, getAllEntries};
 };
 
 //validates that dateStr is formatted as yyyy-mm-dd or yyy-m-d
@@ -459,7 +494,7 @@ function dateIsValid(dateStr){
   return day > 0 && day <= monthLength[month - 1];
 }
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 module.exports = function($http, $location){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
@@ -476,8 +511,10 @@ module.exports = function($http, $location){
       return res;
     }).error((data,status)=>alert('Error authenticating user:'+status))
   }
-  function register(username, password, calorie_budget){
-    return $http.post(registerUri, {username, password, calorie_budget})
+  function register(username, password, calorie_budget, role){
+    let data = {username, password, calorie_budget};
+    if (role) data.role = role;
+    return $http.post(registerUri, data)
     .error((data, status) => alert('Error connecting to server:'+status));
   }
   //Server route requires {username, calorie_budget, role, password}

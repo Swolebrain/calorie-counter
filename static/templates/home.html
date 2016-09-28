@@ -12,11 +12,10 @@
   <a class='btn btn-default'><large>{{date}}</large></a>
   <a ng-click='incDate()' class="btn btn-default"><i class="fa fa-angle-right fa-3x" aria-hidden="true"></i></a>
 </div>
-<new-meal-directive date="date" update-meals='updateMeals()'></new-meal-directive>
+<new-meal date="date" update-meals='updateMeals()'></new-meal>
 <div class='meal-entries'>
+
   <div ng-repeat='meal in meals'>
-    <i class="fa fa-times fa-2x text-danger" ng-click='deleteMeal(meal.id)'></i>
-    <h2>{{meal.text}}</h2>
-    <h3>{{meal.time}}, {{meal.calories}} cals</h3>
+    <meal-display meal='meal' update-meals='updateMeals()'></meal-display>
   </div>
 </div>

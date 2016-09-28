@@ -14,8 +14,10 @@ module.exports = function($http, $location){
       return res;
     }).error((data,status)=>alert('Error authenticating user:'+status))
   }
-  function register(username, password, calorie_budget){
-    return $http.post(registerUri, {username, password, calorie_budget})
+  function register(username, password, calorie_budget, role){
+    let data = {username, password, calorie_budget};
+    if (role) data.role = role;
+    return $http.post(registerUri, data)
     .error((data, status) => alert('Error connecting to server:'+status));
   }
   //Server route requires {username, calorie_budget, role, password}

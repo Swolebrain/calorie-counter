@@ -64,7 +64,8 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./services/userService.js')])
 .factory('entriesService', ['$http', 'userService',
       require('./services/entriesService.js')])
-.directive('newMealDirective', ['$timeout', 'entriesService', require('./directives/NewMealDirective.js')])
+.directive('newMeal', ['$timeout', 'entriesService', require('./directives/newMealDirective.js')])
+.directive('mealDisplay', ['$timeout', 'entriesService', require('./directives/mealDisplayDirective.js')])
 .controller('LoginController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/LoginController.js')])
 .controller('ReportsController', ['$scope', 'userService', '$timeout', 'entriesService',
@@ -75,7 +76,7 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./controllers/Registercontroller.js')])
 .controller('HomeController', ['$scope', 'userService', 'entriesService',
       require('./controllers/HomeController.js')])
-.controller('AdminController', ['$scope', 'userService', 'entriesService',
+.controller('AdminController', ['$scope', 'entriesService',
       require('./controllers/AdminController.js')])
-.controller('UserAdminController', ['$scope', 'userService', 'entriesService',
+.controller('UserAdminController', ['$scope', 'userService', 'entriesService', '$timeout', 
       require('./controllers/UserAdminController.js')]);

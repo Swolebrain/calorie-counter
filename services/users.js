@@ -17,9 +17,9 @@ module.exports = function(app){
         let {id, username, calorie_budget, role} = rows[0];
         req.session.uid = id;
         req.session.isAuthenticated = true;
-        res.json({ id, username, calorie_budget, role});
         if (rows[0].role == 'admin') req.session.isAdmin = true;
         else if (rows[0].role == 'user-admin') req.session.isUserAdmin = true;
+        res.json({ id, username, calorie_budget, role});
       }
       else{
         res.end('Error: password is wrong');
