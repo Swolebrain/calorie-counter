@@ -4,7 +4,19 @@ app.run(['$rootScope', '$location', '$route', 'userService',
   function ($rootScope, $location, $route, userService) {
     $rootScope.$on('$routeChangeStart',
       function (event, next, current) {
-        if (next.access.restricted && !userService.isLoggedIn()) {
+        /*
+          Access restrictions:  0 - no restrictions
+                                1 - all users allowed
+                                2 - userAdmins and admins allowed
+                                3 - only admins allowed
+        */
+        if (next.access.restricted===3 && !userService.isAdmin())
+          bounce();
+        else if (next.access.restricted === 2 && !userService.isUserAdmin() && !userService.isAdmin())
+          bounce();
+        else if (next.access.restricted === 1 && !userService.isLoggedIn())
+          bounce();
+        function bounce(){
           $location.path('/login');
           $route.reload();
         }
@@ -25,17 +37,27 @@ app.run(['$rootScope', '$location', '$route', 'userService',
   .when('/', {
     controller: 'HomeController',
     templateUrl: 'templates/home.html',
-    access: {restricted: true}
+    access: {restricted: 1}
   })
   .when('/settings', {
     controller: 'SettingsController',
     templateUrl: 'templates/settings.html',
-    access: {restricted: true}
+    access: {restricted: 1}
   })
   .when('/reports', {
     controller: 'ReportsController',
     templateUrl: 'templates/reports.html',
-    access: {restricted: true}
+    access: {restricted: 1}
+  })
+  .when('/user-admin', {
+    controller: 'UserAdminController',
+    templateUrl: 'templates/user-admin.html',
+    access: {restricted: 2}
+  })
+  .when('/admin', {
+    controller: 'AdminController',
+    templateUrl: 'templates/admin.html',
+    access: {restricted: 3}
   })
   .otherwise({redirectTo: '/login'});
 })
@@ -52,10 +74,14 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./controllers/SettingsController.js')])
 .controller('RegisterController', ['$scope', 'userService', '$timeout', '$location',
       require('./controllers/Registercontroller.js')])
-.controller('HomeController', ['$scope','$http', 'userService', 'entriesService',
-      require('./controllers/HomeController.js')]);
+.controller('HomeController', ['$scope', 'userService', 'entriesService',
+      require('./controllers/HomeController.js')])
+.controller('AdminController', ['$scope', 'userService', 'entriesService',
+      require('./controllers/AdminController.js')])
+.controller('UserAdminController', ['$scope', 'userService', 'entriesService',
+      require('./controllers/UserAdminController.js')]);
 
-},{"./controllers/HomeController.js":3,"./controllers/LoginController.js":4,"./controllers/Registercontroller.js":5,"./controllers/ReportsController.js":6,"./controllers/SettingsController.js":7,"./directives/NewMealDirective.js":8,"./services/entriesService.js":9,"./services/userService.js":10}],2:[function(require,module,exports){
+},{"./controllers/AdminController.js":3,"./controllers/HomeController.js":4,"./controllers/LoginController.js":5,"./controllers/Registercontroller.js":6,"./controllers/ReportsController.js":7,"./controllers/SettingsController.js":8,"./controllers/UserAdminController.js":9,"./directives/NewMealDirective.js":10,"./services/entriesService.js":11,"./services/userService.js":12}],2:[function(require,module,exports){
 module.exports = function($scope, $timeout){
   return {displayStatus, inputsAreFilled};
 
@@ -94,7 +120,12 @@ module.exports = function($scope, $timeout){
 };
 
 },{}],3:[function(require,module,exports){
-module.exports = function($scope, $http, userService, entriesService){
+module.exports = function($scope, userService, entriesService){
+  console.log("Admin controller reporting in");
+};
+
+},{}],4:[function(require,module,exports){
+module.exports = function($scope, userService, entriesService){
   $scope.meals = [];
   $scope.totalCals = 0;
   $scope.totalCalsClass = '';
@@ -153,7 +184,7 @@ function getDate(dayOffset){
   return year+'-'+month+'-'+day;
 }
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, $location){
   let {displayStatus, inputsAreFilled} = require('../common/common.js')($scope, $timeout);
   $scope.status = '';
@@ -180,7 +211,7 @@ module.exports = function($scope, userService, $timeout, $location){
 
 };
 
-},{"../common/common.js":2}],5:[function(require,module,exports){
+},{"../common/common.js":2}],6:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, $location){
   let {displayStatus, inputsAreFilled} = require('../common/common.js')($scope, $timeout);
 
@@ -206,7 +237,7 @@ module.exports = function($scope, userService, $timeout, $location){
   };
 };
 
-},{"../common/common.js":2}],6:[function(require,module,exports){
+},{"../common/common.js":2}],7:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout, entriesService){
   const displayStatus = require('../common/common.js')($scope, $timeout).displayStatus;
   $scope.logOut = ()=>userService.logOut();
@@ -291,7 +322,7 @@ function convertToMilitaryTime(timeArr){
   return ret;
 }
 
-},{"../common/common.js":2}],7:[function(require,module,exports){
+},{"../common/common.js":2}],8:[function(require,module,exports){
 module.exports = function($scope, userService, $timeout){
   console.log('ReportsController reporting in');
   const displayStatus = require('../common/common.js')($scope, $timeout).displayStatus;
@@ -316,7 +347,12 @@ module.exports = function($scope, userService, $timeout){
   }
 };
 
-},{"../common/common.js":2}],8:[function(require,module,exports){
+},{"../common/common.js":2}],9:[function(require,module,exports){
+module.exports = function($scope, userService, entriesService){
+  console.log("User admin controller reporting in");
+};
+
+},{}],10:[function(require,module,exports){
 module.exports = function($timeout, entriesService){
   return {
     restrict: 'E',
@@ -379,7 +415,7 @@ function findInputErrors(cals,text,time){
   return false;
 }
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 
 module.exports = function($http, userService){
   function getEntriesByDate(date){
@@ -423,14 +459,14 @@ function dateIsValid(dateStr){
   return day > 0 && day <= monthLength[month - 1];
 }
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = function($http, $location){
   const loginUri = 'users/authenticate';
   const registerUri = 'users/';
   //When authenticated, this object contains {id, username, calorie_budget}
   let userObject = null; //localStorage.getItem("userObject");
-  if (userObject) userObject = JSON.parse(userObject);
-  else userObject = null;
+  //if (userObject) userObject = JSON.parse(userObject);
+  //else userObject = null;
   function authenticate(username, password){
     return $http.post(loginUri, {username, password}).success(res=>{
       if (res.id && res.calorie_budget && res.username) {
@@ -467,7 +503,14 @@ module.exports = function($http, $location){
     console.log('logging out...');
     $location.path('/login');
   }
-  return {authenticate, register, isLoggedIn, getUserObject, logOut, updateUser};
+  function isAdmin(){
+    return userObject && userObject.role=='admin';
+  }
+  function isUserAdmin(){
+    return userObject && userObject.role=='user-admin';
+  }
+  return {authenticate, register, isLoggedIn,
+    getUserObject, logOut, updateUser, isAdmin, isUserAdmin};
 };
 
 },{}]},{},[1]);

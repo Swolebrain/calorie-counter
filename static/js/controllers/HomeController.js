@@ -1,4 +1,4 @@
-module.exports = function($scope, $http, userService, entriesService){
+module.exports = function($scope, userService, entriesService){
   $scope.meals = [];
   $scope.totalCals = 0;
   $scope.totalCalsClass = '';

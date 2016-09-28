@@ -6,7 +6,7 @@
   <span class="label label-primary" ng-click='logOut()'>Log Out</span>
 </span>
 <span id='greeting'>Hello, {{user.username}}</span>
-<h2 class='text-center'>Daily Cals: <span ng-class='totalCalsClass'>{{totalCals}}</span></h2>
+<h2 class='text-center'>Daily Cals: <span ng-class='totalCalsClass'>{{totalCals}}/{{user.calorie_budget}}</span></h2>
 <div class="btn-group btn-group-justified">
   <a ng-click='decDate()' class="btn btn-default"><i class="fa fa-angle-left fa-3x" aria-hidden="true"></i></a>
   <a class='btn btn-default'><large>{{date}}</large></a>

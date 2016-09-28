@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const port = 8999;
 const bodyparser = require('body-parser');
+const path = require('path');
 // const cors = require('cors');
 
 //session management
@@ -21,11 +22,10 @@ app.use(session({
   })
 }));
 app.use(express.static('static'));
-app.set('view engine', 'ejs');
 
 //MAIN ROUTES
 app.get('/', function(req, res){
-  res.render('main');
+  res.sendFile(path.join(__dirname+'/views/main.html'));
 });
 
 //Entries CRUD

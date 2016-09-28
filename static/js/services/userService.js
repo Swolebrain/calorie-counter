@@ -3,8 +3,8 @@ module.exports = function($http, $location){
   const registerUri = 'users/';
   //When authenticated, this object contains {id, username, calorie_budget}
   let userObject = null; //localStorage.getItem("userObject");
-  if (userObject) userObject = JSON.parse(userObject);
-  else userObject = null;
+  //if (userObject) userObject = JSON.parse(userObject);
+  //else userObject = null;
   function authenticate(username, password){
     return $http.post(loginUri, {username, password}).success(res=>{
       if (res.id && res.calorie_budget && res.username) {
@@ -41,5 +41,12 @@ module.exports = function($http, $location){
     console.log('logging out...');
     $location.path('/login');
   }
-  return {authenticate, register, isLoggedIn, getUserObject, logOut, updateUser};
+  function isAdmin(){
+    return userObject && userObject.role=='admin';
+  }
+  function isUserAdmin(){
+    return userObject && userObject.role=='user-admin';
+  }
+  return {authenticate, register, isLoggedIn,
+    getUserObject, logOut, updateUser, isAdmin, isUserAdmin};
 };
