@@ -1,15 +1,19 @@
 
 const mysql = require('mysql');
-const connection = mysql.createConnection(require('../.dbconf.json'));
+const dbconf = require('../.dbconf.json');
+let connection = mysql.createConnection(dbconf);
 
-connection.connect(function(err){
-  if(!err){
-    console.log("DB is connected");
+connection.connect(dbConnectionLogger);
+
+connection.on("error", function (err) {
+  if (!err.fatal) {
+    return;
   }
-  else{
-    console.log("Error connecting to the DB: ");
-    console.log(err);
+  if (err.code !== "PROTOCOL_CONNECTION_LOST") {
+    throw err;
   }
+  connection = mysql.createConnection(dbconf);
+  connection.connect(dbConnectionLogger);
 });
 
 function issueQuery(query, res, errMessage, cb){
@@ -43,4 +47,23 @@ function logError(err){
   if (err.toString().includes('ER_DUP_ENTRY') ) return 'Username already exists.';
 }
 
-module.exports = {connection, issueQuery, sanitizeReqBody};
+function dbConnectionLogger(err){
+  if(!err){
+    console.log("DB is connected");
+  }
+  else{
+    console.log("Error connecting to the DB: ");
+    console.log(err);
+    process.exit(1);
+  }
+}
+
+function getConnection(){
+  return connection;
+}
+
+function esc(str){
+  return connection.escape(str);
+}
+
+module.exports = {getConnection, issueQuery, sanitizeReqBody, esc};

@@ -1,4 +1,4 @@
-const {connection, issueQuery, sanitizeReqBody} = require('./db.js');
+const {getConnection, issueQuery, sanitizeReqBody, esc} = require('./db.js');
 const bcrypt = require('bcryptjs');
 
 module.exports = function(app){
@@ -34,7 +34,7 @@ module.exports = function(app){
   });
   //accessible by admin or if req.params.id matches session id
   app.get('/users/:id', authAdminOrOwner, function(req,res){
-    let query = `SELECT * FROM users WHERE id=${connection.escape(req.params.id)}`;
+    let query = `SELECT * FROM users WHERE id=${esc(req.params.id)}`;
     issueQuery(query, res, 'fetching all entries');
   });
   //accessible by admin or if req.params.id matches session id
@@ -58,11 +58,11 @@ module.exports = function(app){
       console.log("User PUT request with password change, new password is "+password);
       password_hash = "'"+bcrypt.hashSync(password, 6)+"'";
       query = `UPDATE users SET username=${username}, calorie_budget=${calorie_budget},
-                  role=${role}, password_hash=${password_hash} WHERE id=${connection.escape(req.params.id)}`;
+                  role=${role}, password_hash=${password_hash} WHERE id=${esc(req.params.id)}`;
     }
     else{
       query = `UPDATE users SET username=${username}, calorie_budget=${calorie_budget},
-                  role=${role} WHERE id=${connection.escape(req.params.id)}`;
+                  role=${role} WHERE id=${esc(req.params.id)}`;
     }
     issueQuery(query, res, 'updating user data for '+req.params.id)
   });
@@ -97,7 +97,7 @@ module.exports = function(app){
   //accessible by admin or if req.params.id matches session id
   app.delete('/users/:id', authAdminOrOwner, function(req,res){
     console.log('request to delete user with id'+req.params.id);
-    let query = `DELETE FROM users WHERE id=${connection.escape(req.params.id)}`;
+    let query = `DELETE FROM users WHERE id=${esc(req.params.id)}`;
     issueQuery(query, res, 'deleting user with id: '+req.params.id);
   });
 };
