@@ -79,7 +79,7 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./controllers/HomeController.js')])
 .controller('AdminController', ['$scope', 'entriesService',
       require('./controllers/AdminController.js')])
-.controller('UserAdminController', ['$scope', 'userService', 'entriesService', '$timeout', 
+.controller('UserAdminController', ['$scope', 'userService', 'entriesService', '$timeout',
       require('./controllers/UserAdminController.js')]);
 
 },{"./controllers/AdminController.js":3,"./controllers/HomeController.js":4,"./controllers/LoginController.js":5,"./controllers/Registercontroller.js":6,"./controllers/ReportsController.js":7,"./controllers/SettingsController.js":8,"./controllers/UserAdminController.js":9,"./directives/mealDisplayDirective.js":10,"./directives/newMealDirective.js":11,"./services/entriesService.js":12,"./services/userService.js":13}],2:[function(require,module,exports){

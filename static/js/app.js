@@ -78,5 +78,5 @@ app.run(['$rootScope', '$location', '$route', 'userService',
       require('./controllers/HomeController.js')])
 .controller('AdminController', ['$scope', 'entriesService',
       require('./controllers/AdminController.js')])
-.controller('UserAdminController', ['$scope', 'userService', 'entriesService', '$timeout', 
+.controller('UserAdminController', ['$scope', 'userService', 'entriesService', '$timeout',
       require('./controllers/UserAdminController.js')]);
