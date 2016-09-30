@@ -9,7 +9,8 @@ app.run(['$rootScope', '$location', '$route', 'userService',
                                 2 - userAdmins and admins allowed
                                 3 - only admins allowed
         */
-        if (next.access.restricted===3 && !userService.isAdmin())
+        if (!next.access) bounce(); //this means the route is invalid or undefined access
+        else if (next.access.restricted===3 && !userService.isAdmin())
           bounce();
         else if (next.access.restricted === 2 && !userService.isUserAdmin() && !userService.isAdmin())
           bounce();
