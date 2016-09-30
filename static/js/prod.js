@@ -350,6 +350,8 @@ module.exports = function($scope, userService, entriesService, $timeout){
   $scope.newUser = {role: 'user'};
   $scope.create = createUser;
   $scope.logOut = ()=>userService.logOut();
+  $scope.users = [];
+  loadUsers();
 
   function createUser(){
     $scope.status = 'Registering...';
@@ -360,6 +362,10 @@ module.exports = function($scope, userService, entriesService, $timeout){
       $timeout(()=>$scope.status='',2500);
     })
     .error((data,err)=>alert('Error connecting to server. '+data+'. '+err));
+  }
+  function loadUsers(){
+    userService.getAllUsers().success(res=>$scope.users=res)
+    .error((data,status)=>alert("error fetching all users: "+data+", "+status));
   }
 };
 
@@ -528,6 +534,14 @@ module.exports = function($http, $location){
       return res;
     });
   }
+  //server routes for admin and user-admin to see all users
+  function getAllUsers(){
+    if (isAdmin() || isUserAdmin()){
+      return $http.get('users/');
+    }
+    alert('Unauthorized: cannot see all users');
+    return [];
+  }
   function isLoggedIn(){
     return userObject != null;
   }
@@ -547,7 +561,7 @@ module.exports = function($http, $location){
     return userObject && userObject.role=='user-admin';
   }
   return {authenticate, register, isLoggedIn,
-    getUserObject, logOut, updateUser, isAdmin, isUserAdmin};
+    getUserObject, logOut, updateUser, isAdmin, isUserAdmin, getAllUsers};
 };
 
 },{}]},{},[1]);

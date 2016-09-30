@@ -31,6 +31,14 @@ module.exports = function($http, $location){
       return res;
     });
   }
+  //server routes for admin and user-admin to see all users
+  function getAllUsers(){
+    if (isAdmin() || isUserAdmin()){
+      return $http.get('users/');
+    }
+    alert('Unauthorized: cannot see all users');
+    return [];
+  }
   function isLoggedIn(){
     return userObject != null;
   }
@@ -50,5 +58,5 @@ module.exports = function($http, $location){
     return userObject && userObject.role=='user-admin';
   }
   return {authenticate, register, isLoggedIn,
-    getUserObject, logOut, updateUser, isAdmin, isUserAdmin};
+    getUserObject, logOut, updateUser, isAdmin, isUserAdmin, getAllUsers};
 };

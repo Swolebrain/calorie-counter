@@ -45,3 +45,9 @@
     <h3 id='status'>{{status}}</h3>
   </div>
 </form>
+
+<div class='container' ng-repeat='user in users'>
+  <h3>Username: {{user.username}}</h3>
+  <h4>uid: {{user.id}}</h4>
+  <h4>Calories: {{user.calorie_budget}}</h4>
+</div>
